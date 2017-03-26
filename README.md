@@ -72,4 +72,4 @@ Example:
     In[12]: i.ix[1:4, "two"].xl.frange
     Out[12]: 'Cool Sheet!G7:G10'
 
-NOTE: This is not fully tested. Please report any bugs for squishing, or help out!
+NOTE: This is still in early stages and not fully tested. Please report any bugs for squishing, or help out!
