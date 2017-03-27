@@ -26,19 +26,8 @@ class IndexerProxyMixin:
     def __getitem__(self, item):
         obj = super().__getitem__(item)
         if isinstance(obj, pd.Index):
-            # Filter out MultiIndex due to funny initialisation
-            if isinstance(obj, MultiIndex):
-                obj = MultiIndexProxy.guarantee_proxy_new(obj)
-                """From Pandas Source:  pandas/pandas/indexes/base.py"""
-                if is_bool_dtype(item):
-                    item = maybe_booleans_to_slice(item.view('u1'))
-                else:
-                    item = maybe_indices_to_slice(item.astype('i8'), len(self))
-                """Stop"""
-            else:
-                obj = self.__class__(obj)
+            obj = self.__class__(obj)
             obj.xl = self.xl[item]
-
         return obj
 
 
@@ -54,10 +43,12 @@ for indexer_type in (Int64Index, Float64Index, RangeIndex,
     index_proxies[indexer_type.__name__] = IndexerProxyFactory
 
 
-class MultiIndexProxy(IndexerProxyMixin, MultiIndex):
+class MultiIndexProxy(MultiIndex):
     """
     Like a normal MultiIndex, but with the .xl attribute, that gives the location of the labels row
     """
+    _attributes = ["name", "xl"] # Don't forget where I am
+    _infer_as_myclass = True # Don't change me
 
     def __new__(cls, *args, **kwargs):
         """
@@ -93,7 +84,15 @@ class MultiIndexProxy(IndexerProxyMixin, MultiIndex):
         return result
         """Stop"""
 
-class IndexProxy( IndexerProxyMixin, pd.Index):
+    def __getitem__(self, item):
+        obj = super().__getitem__(item)
+        if isinstance(obj, pd.MultiIndex):
+            obj = MultiIndexProxy.guarantee_proxy_new(obj)
+            obj.xl = self.xl[item]
+        return obj
+
+
+class IndexProxy(IndexerProxyMixin, pd.Index):
     """
     Needs to be treated specially as __new__ is often called, and allowed to determine what Index type to use.
 
