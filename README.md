@@ -12,64 +12,62 @@ This will return an XLRange or XLCell object that represents the range or cell t
 
 These can then be turning into excel notation with either:
 
-    obj.xl.range -> A1:C5 (for ranges)
-    obj.xl.cell  -> C5 (for cells)
+    obj.xl.range -> <XLRange A1:C5> (for ranges)
+    obj.xl.cell  -> <XLCell C5> (for cells)
 
 For convenience add the f prefix for a formula compatible version
 
-    obj.xl.frange -> ="Sheet1"!A1:C5
-    obj.xl.cell   -> ="Sheet1"!C5
+    obj.xl.frange -> "Sheet1"!A1:C5
+    obj.xl.cell   -> C5
 
 Example:
 
-    In[2]: f = EmbededFrame({"one": range(10), "two": range(10, 20), "three": range(20, 30)})
+    In[3]: print(f)
+    Out[3]:
+                        Mon                  Tues      Weds       Thur
+    Meal
+    Breakfast         Toast                 Bagel    Cereal  Croissant
+    Lunch              Soup  Something Different!      Rice     Hotpot
+    Dinner            Curry                  Stew     Pasta    Gnocchi
+    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
 
-    In[3]: f
-    Out[4]:
-       one  three  two
-    0    0     20   10
-    1    1     21   11
-    2    2     22   12
-    3    3     23   13
-    4    4     24   14
-    5    5     25   15
-    6    6     26   16
-    7    7     27   17
-    8    8     28   18
-    9    9     29   19
-    In[5]: i = f.to_excel("temp.xlsx", sheet_name="Cool Sheet", startrow=4, startcol=3)
-    In[6]: i
-    Out[6]:
-       one three  two
-    0   E6    F6   G6
-    1   E7    F7   G7
-    2   E8    F8   G8
-    3   E9    F9   G9
-    4  E10   F10  G10
-    5  E11   F11  G11
-    6  E12   F12  G12
-    7  E13   F13  G13
-    8  E14   F14  G14
-    9  E15   F15  G15
-    In[7]: i.loc[:, "two"]
-    Out[7]:
-    0     G6
-    1     G7
-    2     G8
-    3     G9
-    4    G10
-    5    G11
-    6    G12
-    7    G13
-    8    G14
-    9    G15
-    Name: two, dtype: object
-    In[8]: i.loc[:, "two"].index.xl
-    Out[8]: D6:D15
-    In[9]: i.loc[:, "two"].xl
-    Out[9]: G6:G15
+    In[7]: i = f.to_excel("t.xlsx")
+    In[8]: i
+    Out[8]:
+                             Mon          Tues          Weds          Thur
+    Meal
+    Breakfast       <XLCell: B2>  <XLCell: C2>  <XLCell: D2>  <XLCell: E2>
+    Lunch           <XLCell: B3>  <XLCell: C3>  <XLCell: D3>  <XLCell: E3>
+    Dinner          <XLCell: B4>  <XLCell: C4>  <XLCell: D4>  <XLCell: E4>
+    Midnight Snack  <XLCell: B5>  <XLCell: C5>  <XLCell: D5>  <XLCell: E5>
 
-    In[12]: i.ix[1:4, "two"].xl.frange
-    Out[12]: 'Cool Sheet!G7:G10'
+    In[10]: i.index.xl
+    Out[10]: <XLRange: A2:A5>
 
-NOTE: This is still in early stages and not fully tested. Please report any bugs for squishing, or help out!
+    In[11]: i.columns.xl
+    Out[11]: <XLRange: B1:E1>
+
+    In[9]: i.loc["Lunch", :].xl
+    Out[9]: <XLRange: B3:E3>
+
+
+This really starts to look nice when using something like xlsxwriter.
+
+For example, to create without XLWriter can look like:
+
+    for col_num in range(1, len(calories_per_meal.index) + 1):
+        without_chart.add_series({
+            'name':       ["Without", col_num, 0],
+            'categories': ["Without", 0, 1, 0, 4],
+            'values':     ["Without", col_num, 1, col_num, 4]})
+
+which to me looks pretty ugly and confusing. Instead with XLLink this becomes:
+
+
+    for time in calories_per_meal.index:
+        xl_linked_chart.add_series({
+                            'name': time,
+                            'categories': proxy.columns.xl.frange,
+                            'values': proxy.loc[time].xl.frange})
+
+NOTE: This is still in early stages and not fully tested. Please report any bugs for squishing, or help out! Check if your usage case is covered in test.py!

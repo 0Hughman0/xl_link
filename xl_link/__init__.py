@@ -10,7 +10,7 @@ from pandas import (Int64Index,
                     PeriodIndex,
                     TimedeltaIndex)
 
-from xl_link.xl_types import XLCell
+from .xl_types import XLCell
 
 
 index_proxies = {}
@@ -62,11 +62,22 @@ class MultiIndexProxy(MultiIndex):
         else:
             return obj
 
+    def take(self, indices, axis=0, allow_fill=True,
+             fill_value=None, **kwargs):
+        obj = super().take(indices, axis, allow_fill, fill_value, **kwargs)
+        try:
+            start, stop = indices
+        except TypeError:
+            raise TypeError("XL_Link only supports plain slicing (step = 1)")
+        xl = self.xl[start:stop + 1]
+        obj.xl = xl
+        return obj
+
     @classmethod
     def guarantee_proxy_new(cls, multi_index):
         """
         From Pandas Source:  pandas/pandas/indexes/multi.py
-        I don't really unerstand all of this bit! - DANGER!
+        I don't really understand all of this bit! - DANGER!
         """
         result = object.__new__(MultiIndexProxy) # what is this ? 8O
         result._set_levels(multi_index.levels, copy=True, validate=False)
@@ -111,26 +122,48 @@ class IndexProxy(IndexerProxyMixin, pd.Index):
         return obj
 
 
+class SeriesProxy(pd.Series):
+    """
+    Proxy for Pandas Series
+    """
+
+    @property
+    def xl(self):
+        """
+        Provides xl property that gives the XLRange corresponding to position
+        """
+        return self.iat[0] - self.iat[-1]
+
+
+    @property
+    def _constructor(self):
+        return SeriesProxy
+
+    @property
+    def _constructor_expanddim(self):
+        return FrameProxy
+
 class FrameProxy(pd.DataFrame):
     """
     DataFrame that contains all the information about it's parent DataFrame's positions on an Excel file
     """
 
     @classmethod
-    def create(cls, frame, startrow, startcol, sheetname, index_label=False):
+    def create(cls, frame, startrow, startcol, sheetname, has_blank_line=False):
         """
         Initialise creating the 'Proxy' version of frame
         """
         obj = cls(frame)
-        for x in range(obj.index.size):
-            for y in range(obj.columns.size):
-                obj.ix[x, y] = XLCell(sheetname, x + startrow, y + startcol)
-
+        x_range = obj.index.size
+        y_range = obj.columns.size
+        for x in range(x_range):
+            for y in range(y_range):
+                obj.iloc[x, y] = XLCell(sheetname, x + startrow, y + startcol)
         i_start = obj.iat[0, 0].translate(0, -1)
         i_stop = obj.iat[-1, 0].translate(0, -1)
         cols_start = obj.iat[0, 0].translate(-1, 0)
         cols_stop = obj.iat[0, -1].translate(-1, 0)
-        if index_label: # Puts strange blank line between top of table and index!?
+        if has_blank_line: # Puts strange blank line between top of table and index!?
             cols_start = cols_start.translate(-1, 0)
             cols_stop = cols_stop.translate(-1, 0)
 
@@ -149,7 +182,7 @@ class FrameProxy(pd.DataFrame):
         """
         Provides xl property that gives the XLRange corresponding to position
         """
-        return super().iat[0, 0] - super().iat[-1, -1]
+        return self.iat[0, 0] - self.iat[-1, -1]
 
     @property
     def _constructor(self):
@@ -159,22 +192,11 @@ class FrameProxy(pd.DataFrame):
     def _constructor_sliced(self):
         return SeriesProxy
 
-
-class SeriesProxy(pd.Series):
-    """
-    Proxy for Pandas Series
-    """
-
     @property
-    def xl(self):
-        """
-        Provides xl property that gives the XLRange corresponding to position
-        """
-        return self.iat[0] - self.iat[-1]
+    def _constructor_expanddim(self):
+        return pd.Panel
 
-    @property
-    def _constructor(self):
-        return SeriesProxy
+
 
 
 class EmbededFrame(pd.DataFrame):
@@ -210,15 +232,22 @@ class EmbededFrame(pd.DataFrame):
             f = f[header]
         if isinstance(index, list):
             f = f.ix[index, :]
-        if f.index.nlevels > 1 and index_label is not False:
+
+        if f.columns.nlevels > 1 or (f.index.nlevels > 1 and f.index.name):
             index_label = True
         if header:
             startrow += f.columns.nlevels
             if index_label:
                 startrow += 1
+
         if index:
             startcol += f.index.nlevels
+
+        if index is False:
+            startcol += -1
+
         frame_proxy = FrameProxy.create(f, startrow, startcol, sheet_name, index_label)
+
         return frame_proxy
 
     @property

@@ -1,177 +1,142 @@
 import unittest
+from collections import OrderedDict
 
 import pandas as pd
 
 from xl_link import EmbededFrame
 
+from openpyxl import load_workbook
+
 idx = pd.IndexSlice
 
-base_frame = pd.DataFrame({'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                            'Mon': ('Toast', 'Soup', 'Curry', 'Shmores'),
-                            'Tues': ('Toast', 'Something Different!', 'Curry', 'Shmores'),
-                            'Weds': ('Toast', 'Soup', 'Curry', 'Biscuits'),
-                            'Thur': ('Toast', 'Hotpot', 'Curry', 'Chocolate')})
+base_frame = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
+                          data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+                                'Mon': ('Toast', 'Soup', 'Curry', 'Shmores'),
+                                'Tues': ('Bagel', 'Something Different!', 'Stew', 'Cookies'),
+                                'Weds': ('Cereal', 'Rice', 'Pasta', 'Biscuits'),
+                                'Thur': ('Croissant', 'Hotpot', 'Gnocchi', 'Chocolate')})
+
+print("\n\nTest Frame:\n\n{}\n\n".format(base_frame))
 
 
-class NoOffsetCase(unittest.TestCase):
+def case_factory(name, to_excel_args, to_excel_kwargs, f):
 
-    def setUp(self):
-        self.f = EmbededFrame(base_frame.copy())
-        self.frame_proxy = self.f.to_excel("{}.xlsx".format(self.__class__.__name__), engine="xlsxwriter")
+    class FactoryCase(unittest.TestCase):
 
-    def test_extreme_cells(self):
-        self.assertEqual(self.frame_proxy.iat[0, 0].cell, "B2")
-        self.assertEqual(self.frame_proxy.iat[-1, -1].cell, "F5")
-        self.assertEqual(self.frame_proxy.xl.range, "{}:{}".format("B2", "F5"))
+        @classmethod
+        def setUpClass(cls):
+            cls.to_excel_args = to_excel_args
+            cls.to_excel_kwargs = to_excel_kwargs
+            cls.f = EmbededFrame(f)
+            cls.__name__ = name
 
-    def test_series_slices(self):
-        slice = self.frame_proxy.loc[:, "Weds"]
-        self.assertEqual(slice.xl.range, "F2:F5")
-        self.assertEqual(slice.index.xl.range, "A2:A5")
+        def has_index_type(self, type):
+            return isinstance(self.f.index, type)
 
-    def test_frame_slices(self):
-        slice = self.frame_proxy.loc[1:2, "Mon":"Tues"]
-        self.assertEqual(slice.xl.range, "C3:E4")
-        self.assertEqual(slice.index.xl.range, "A3:A4")
-        self.assertEqual(slice.columns.xl.range, "C1:E1")
+        def setUp(self):
+            file_name = "{}.xlsx".format(self.__class__.__name__)
+            self.frame_proxy = self.f.to_excel(file_name, *self.to_excel_args, engine="xlsxwriter", **self.to_excel_kwargs)
+            self.workbook = load_workbook(file_name)
 
+        def check_value(self, value, position, msg=None):
+            found_value = self.workbook["Sheet1"][position].value
+            with self.subTest(msg=msg, value=value, position=position, found_value=found_value):
+                self.assertEqual(value, found_value)
 
-class OffsetCase(unittest.TestCase):
+        def check_data(self, frame, frame_proxy, msg=None):
+            for f_row, p_row in zip(frame.iterrows(), frame_proxy.iterrows()):
+                _, f_row = f_row
+                _, p_row = p_row
+                for value, position in zip(f_row, p_row):
+                    self.check_value(value, position.cell, msg)
 
-    def setUp(self):
-        self.f = EmbededFrame(base_frame.copy())
-        self.frame_proxy = self.f.to_excel("{}.xlsx".format(self.__class__.__name__), startrow=4, startcol=8, engine="xlsxwriter")
+        def check_index(self, frame_index, proxy_index, msg=None):
 
-    def test_extreme_cells(self):
-        self.assertEqual(self.frame_proxy.iat[0, 0].cell, "J6")
-        self.assertEqual(self.frame_proxy.iat[-1, -1].cell, "N9")
-        self.assertEqual(self.frame_proxy.xl.range, "{}:{}".format("J6", "N9"))
+            for value, position in zip(frame_index, proxy_index.xl):
+                if self.has_index_type(pd.MultiIndex):
+                    value = value[-1]
+                self.check_value(value, position.cell, msg)
 
-    def test_series_slices(self):
-        # Col
-        slice = self.frame_proxy.loc[1:3, "Meal"]
-        self.assertEqual(slice.xl.range, "J7:J9")
-        self.assertEqual(slice.index.xl.range, "I7:I9")
-        # Row
-        slice = self.frame_proxy.loc[2, "Mon":"Thur"]
-        self.assertEqual(slice.xl.range, "K8:L8")
-        self.assertEqual(slice.index.xl.range, "K5:L5")
-        # Col by index
-        slice = self.frame_proxy.iloc[1:4, 0]
-        self.assertEqual(slice.xl.range, "J7:J9")
-        self.assertEqual(slice.index.xl.range, "I7:I9")
-        # Row by index
-        slice = self.frame_proxy.iloc[2, 1:3]
-        self.assertEqual(slice.xl.range, "K8:L8")
-        self.assertEqual(slice.index.xl.range, "K5:L5")
+        def test_data(self):
+            self.check_data(self.f, self.frame_proxy)
 
-    def test_frame_slices(self):
-        # By label
-        slice = self.frame_proxy.loc[1:2, "Thur":"Weds"]
-        self.assertEqual(slice.xl.range, "L7:N8")
-        self.assertEqual(slice.index.xl.range, "I7:I8")
-        self.assertEqual(slice.columns.xl.range, "L5:N5")
-        # By index
-        slice = self.frame_proxy.iloc[1:3, 2:5]
-        self.assertEqual(slice.xl.range, "L7:N8")
-        self.assertEqual(slice.index.xl.range, "I7:I8")
-        self.assertEqual(slice.columns.xl.range, "L5:N5")
+        def test_columns(self):
+            self.check_index(self.f.columns, self.frame_proxy.columns)
 
+        def test_index(self):
+            self.check_index(self.f.index, self.frame_proxy.index)
 
-class TextIndexCase(unittest.TestCase):
+        def test_series_slice(self):
+            row_slice_row_indexer = "Breakfast"
+            row_slice_col_indexer = slice("Mon", "Weds")
 
-    def setUp(self):
-        self.f = EmbededFrame(base_frame.copy())
-        self.f.set_index("Meal", drop=True, inplace=True)
-        self.frame_proxy = self.f.to_excel("{}.xlsx".format(self.__class__.__name__), startrow=4, startcol=8, engine="xlsxwriter")
+            col_slice_row_indexer = slice("Lunch", "Midnight Snack")
+            col_slice_col_indexer = "Thur"
 
-    def test_extreme_cells(self):
-        self.assertEqual(self.frame_proxy.iat[0, 0].cell, "J6")
-        self.assertEqual(self.frame_proxy.iat[-1, -1].cell, "M9")
-        self.assertEqual(self.frame_proxy.xl.range, "{}:{}".format("J6", "M9"))
+            if self.has_index_type(pd.RangeIndex):
+                row_slice_row_indexer = 0
+                col_slice_row_indexer = slice(1, 3)
 
-    def test_series_slices(self):
-        # Col
-        slice = self.frame_proxy.loc["Lunch":"Midnight Snack", "Thur"]
-        self.assertEqual(slice.xl.range, "K7:K9")
-        self.assertEqual(slice.index.xl.range, "I7:I9")
-        # Row
-        slice = self.frame_proxy.loc["Lunch", "Mon":"Thur"]
-        self.assertEqual(slice.xl.range, "J7:K7")
-        # Col by index
-        slice = self.frame_proxy.iloc[1:4, 0]
-        self.assertEqual(slice.xl.range, "J7:J9")
-        self.assertEqual(slice.index.xl.range, "I7:I9")
-        # Row by index
-        slice = self.frame_proxy.iloc[2, 1:3]
-        self.assertEqual(slice.xl.range, "K8:L8")
-        self.assertEqual(slice.index.xl.range, "K5:L5")
+            if self.has_index_type(pd.MultiIndex):
+                row_slice_row_indexer = ("Pre-Noon", "Breakfast")
+                col_slice_col_indexer = ("Late Week", "Thur")
 
-    def test_frame_slices(self):
-        # By label
-        slice = self.frame_proxy.loc["Lunch":"Dinner", "Thur":"Weds"]
-        self.assertEqual(slice.xl.range, "K7:M8")
-        self.assertEqual(slice.index.xl.range, "I7:I8")
-        self.assertEqual(slice.columns.xl.range, "K5:M5")
-        # By index
-        slice = self.frame_proxy.iloc[1:3, 1:4]
-        self.assertEqual(slice.xl.range, "K7:M8")
-        self.assertEqual(slice.index.xl.range, "I7:I8")
-        self.assertEqual(slice.columns.xl.range, "K5:M5")
+            row_slice = self.f.loc[row_slice_row_indexer][row_slice_col_indexer]
+            proxy_row_slice = self.frame_proxy.loc[row_slice_row_indexer][row_slice_col_indexer]
+
+            self.check_index(row_slice.index, proxy_row_slice.index, msg="Series row slice check index")
+
+            for value, position in zip(row_slice, proxy_row_slice):
+                self.check_value(value, position.cell, msg="Series row slice check data")
+
+            col_slice = self.f.loc[col_slice_row_indexer][col_slice_col_indexer]
+            proxy_col_slice = self.frame_proxy.loc[col_slice_row_indexer][col_slice_col_indexer]
+
+            self.check_index(col_slice.index, proxy_col_slice.index, msg="Series col slice check index")
+
+            for value, position in zip(col_slice, proxy_col_slice):
+                self.check_value(value, position.cell, msg="Series col slice check data")
+
+        def test_frame_slice(self):
+            slice_row_indexer = slice("Lunch", "Dinner")
+            slice_col_indexer = slice("Tues", "Weds")
+
+            if self.has_index_type(pd.RangeIndex):
+                slice_row_indexer = slice(1, 2)
+
+            frame_slice = self.f.loc[slice_row_indexer, slice_col_indexer]
+            proxy_frame_slice = self.frame_proxy.loc[slice_row_indexer, slice_col_indexer]
+
+            self.check_data(frame_slice, proxy_frame_slice, msg="Frame slice check data")
+            self.check_index(frame_slice.index, proxy_frame_slice.index, msg="Frame slice check index")
+            self.check_index(frame_slice.columns, proxy_frame_slice.columns, msg="Frame slice check columns")
+
+    return FactoryCase
 
 
-class MultiIndexCase(unittest.TestCase):
+NoOffsetCase = case_factory("NoOffsetCase", [], {}, base_frame)
+OffsetCase = case_factory("OffsetCase", [], {"startrow": 10, "startcol": 13}, base_frame)
+TextIndexCase = case_factory("TextIndexCase", [], {}, base_frame.set_index("Meal", drop=True))
 
-    def setUp(self):
-        self.f = EmbededFrame(base_frame.copy())
+# MultiIndex Case setup
+multi_cols = pd.MultiIndex.from_tuples(tuple(zip( ("Early Week", "Early Week", "Late Week", "Late Week"),
+                                                  ("Mon"       , "Tues"      , "Weds"     , "Thur"     ))))
+multi_index = pd.MultiIndex.from_tuples(tuple(zip(("Pre-Noon" , "Pre-Noon", "Post-Noon", "Post-Noon"     ),
+                                                  ("Breakfast", "Lunch"   , "Dinner"   , "Midnight Snack"))))
+multi_f = base_frame.copy()
+multi_f.set_index(multi_index, inplace=True)
+multi_f.drop("Meal", axis=1, inplace=True)
+multi_f.columns = multi_cols
+multi_f.sortlevel(inplace=True)
+multi_f.sortlevel(axis=1, inplace=True)
 
-        multi_cols = pd.MultiIndex.from_tuples(tuple(zip(("Early Week", "Early Week", "Late Week", "Late Week"),
-                                              ("Mon"       , "Thur"      , "Tues"     , "Weds"     ))))
-        multi_index = pd.MultiIndex.from_tuples(tuple(zip(("Pre-Noon", "Pre-Noon", "Post-Noon", "Post-Noon"),
-                                                    ("Breakfast"       , "Lunch"      , "Dinner"     , "Midnight Snack"     ))))
-        self.f.set_index(multi_index, inplace=True)
-        self.f.drop("Meal", axis=1, inplace=True)
-        self.f.columns = multi_cols
-        self.f.sortlevel(inplace=True)
-        self.f.sortlevel(axis=1, inplace=True)
-        self.frame_proxy = self.f.to_excel("{}.xlsx".format(self.__class__.__name__), startrow=4, startcol=8, engine="xlsxwriter")
+print("\n\nMultiIndex Frame:\n\n{}\n\n".format(multi_f))
 
-    def test_extreme_cells(self):
-        self.assertEqual(self.frame_proxy.iat[0, 0].cell, "K8")
-        self.assertEqual(self.frame_proxy.iat[-1, -1].cell, "N11")
-        self.assertEqual(self.frame_proxy.xl.range, "{}:{}".format("K8", "N11"))
+MultiIndexCase = case_factory("MultiIndexCase", [], {}, multi_f)
 
-    def test_series_slices(self):
-        # Col
-        slice = self.frame_proxy.loc[idx["Pre-Noon", :], idx["Early Week", "Thur"]]
-        self.assertEqual(slice.xl.range, "L10:L11")
-#        self.assertEqual(slice.index.xl.range, "J10:J11")
-        # Row
-        slice = self.frame_proxy.loc[idx["Pre-Noon", "Lunch"], :]
-        self.assertEqual(slice.xl.range, "K9:N9")
-        self.assertEqual(slice.index.xl.range, "K6:N6")
-        # Col by index
-        slice = self.frame_proxy.iloc[1:4, 0]
-        self.assertEqual(slice.xl.range, "J7:J9")
-        self.assertEqual(slice.index.xl.range, "I7:I9")
-        # Row by index
-        slice = self.frame_proxy.iloc[2, 1:3]
-        self.assertEqual(slice.xl.range, "K8:L8")
-        self.assertEqual(slice.index.xl.range, "K5:L5")
-
-    def test_frame_slices(self):
-        # By label
-        slice = self.frame_proxy.loc[idx["Post-Noon", "Dinner"]:idx["Pre-Noon", "Breakfast"], idx["Early Week", :]]
-        print(slice)
-        self.assertEqual(slice.xl.range, "K8:L10")
-        self.assertEqual(slice.index.xl.range, "J8:J10")
-#        self.assertEqual(slice.columns.xl.range, "K5:L5")
-        # By index
-        slice = self.frame_proxy.iloc[1:3, 1:4]
-        self.assertEqual(slice.xl.range, "K7:M8")
-        self.assertEqual(slice.index.xl.range, "I7:I8")
-        self.assertEqual(slice.columns.xl.range, "K5:M5")
+SlicedIndexCase = case_factory("SlicedIndexCase", [], {"index": ["Breakfast", "Lunch"]}, base_frame.set_index("Meal", drop=True))
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main(verbosity=4)
+
 
