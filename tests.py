@@ -7,6 +7,12 @@ from xl_link import EmbededFrame
 
 from openpyxl import load_workbook
 
+TEST_CASE_FOLDER = ".\\test_cases\\{}"
+
+
+def path_for(filename):
+    return TEST_CASE_FOLDER.format(filename)
+
 idx = pd.IndexSlice
 
 base_frame = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
@@ -34,7 +40,7 @@ def case_factory(name, to_excel_args, to_excel_kwargs, f):
             return isinstance(self.f.index, type)
 
         def setUp(self):
-            file_name = "{}.xlsx".format(self.__class__.__name__)
+            file_name = path_for("{}.xlsx".format(self.__class__.__name__))
             self.frame_proxy = self.f.to_excel(file_name, *self.to_excel_args, engine="xlsxwriter", **self.to_excel_kwargs)
             self.workbook = load_workbook(file_name)
 
@@ -137,6 +143,6 @@ MultiIndexCase = case_factory("MultiIndexCase", [], {}, multi_f)
 SlicedIndexCase = case_factory("SlicedIndexCase", [], {"index": ["Breakfast", "Lunch"]}, base_frame.set_index("Meal", drop=True))
 
 if __name__ == "__main__":
-    unittest.main(verbosity=4)
+    unittest.main(verbosity=1)
 
 
