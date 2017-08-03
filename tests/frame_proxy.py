@@ -1,17 +1,17 @@
 import unittest
-from collections import OrderedDict
+from pathlib import Path
 
 import pandas as pd
+from openpyxl import load_workbook
 
 from xl_link import EmbededFrame
 
-from openpyxl import load_workbook
 
-TEST_CASE_FOLDER = ".\\test_cases\\{}"
+TEST_CASE_FOLDER = Path("./tests/test_cases")
 
 
 def path_for(filename):
-    return TEST_CASE_FOLDER.format(filename)
+    return (TEST_CASE_FOLDER / filename).absolute().as_posix()
 
 idx = pd.IndexSlice
 
@@ -21,8 +21,6 @@ base_frame = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
                                 'Tues': ('Bagel', 'Something Different!', 'Stew', 'Cookies'),
                                 'Weds': ('Cereal', 'Rice', 'Pasta', 'Biscuits'),
                                 'Thur': ('Croissant', 'Hotpot', 'Gnocchi', 'Chocolate')})
-
-print("\n\nTest Frame:\n\n{}\n\n".format(base_frame))
 
 
 def case_factory(name, to_excel_args, to_excel_kwargs, f):
@@ -57,7 +55,6 @@ def case_factory(name, to_excel_args, to_excel_kwargs, f):
                     self.check_value(value, position.cell, msg)
 
         def check_index(self, frame_index, proxy_index, msg=None):
-
             for value, position in zip(frame_index, proxy_index.xl):
                 if self.has_index_type(pd.MultiIndex):
                     value = value[-1]
@@ -119,12 +116,8 @@ def case_factory(name, to_excel_args, to_excel_kwargs, f):
 
     return FactoryCase
 
+#  MultiIndex Case setup ###############################################################################################
 
-NoOffsetCase = case_factory("NoOffsetCase", [], {}, base_frame)
-OffsetCase = case_factory("OffsetCase", [], {"startrow": 10, "startcol": 13}, base_frame)
-TextIndexCase = case_factory("TextIndexCase", [], {}, base_frame.set_index("Meal", drop=True))
-
-# MultiIndex Case setup
 multi_cols = pd.MultiIndex.from_tuples(tuple(zip( ("Early Week", "Early Week", "Late Week", "Late Week"),
                                                   ("Mon"       , "Tues"      , "Weds"     , "Thur"     ))))
 multi_index = pd.MultiIndex.from_tuples(tuple(zip(("Pre-Noon" , "Pre-Noon", "Post-Noon", "Post-Noon"     ),
@@ -136,13 +129,16 @@ multi_f.columns = multi_cols
 multi_f.sortlevel(inplace=True)
 multi_f.sortlevel(axis=1, inplace=True)
 
-print("\n\nMultiIndex Frame:\n\n{}\n\n".format(multi_f))
+########################################################################################################################
 
+
+NoOffsetCase = case_factory("NoOffsetCase", [], {}, base_frame)
+OffsetCase = case_factory("OffsetCase", [], {"startrow": 10, "startcol": 13}, base_frame)
+TextIndexCase = case_factory("TextIndexCase", [], {}, base_frame.set_index("Meal", drop=True))
 MultiIndexCase = case_factory("MultiIndexCase", [], {}, multi_f)
-
 SlicedIndexCase = case_factory("SlicedIndexCase", [], {"index": ["Breakfast", "Lunch"]}, base_frame.set_index("Meal", drop=True))
 
 if __name__ == "__main__":
-    unittest.main(verbosity=1)
+    unittest.main(verbosity=3)
 
 

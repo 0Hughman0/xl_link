@@ -7,6 +7,15 @@ def is_int_type(i):
         return int(i) == i
     except TypeError:
         return False
+    except ValueError:
+        return False
+
+
+def fill_slice(holey_slice):
+    return slice(holey_slice.start if holey_slice.start is not None else 0,
+                 holey_slice.stop if holey_slice.stop is not None else -1,
+                 holey_slice.step if holey_slice.step is not None else 1)
+
 
 class XLCell:
     """
@@ -19,7 +28,7 @@ class XLCell:
         self.col = col
 
     @classmethod
-    def from_cell(cls, cell, sheet= "Sheet 1"):
+    def from_cell(cls, cell, sheet="Sheet 1"):
         return XLCell(sheet, *xl_cell_to_rowcol(cell))
 
     @property
@@ -71,8 +80,8 @@ class XLRange:
     def __init__(self, start, stop):
         assert start.sheet == stop.sheet, "start and stop must be in the same sheet"
         self.sheet = start.sheet
-        self.start = start
-        self.stop = stop
+        self.start = start.copy()
+        self.stop = stop.copy()
 
     @property
     def range(self):
@@ -98,11 +107,11 @@ class XLRange:
 
     @property
     def is_row(self):
-        return self.shape[1] == 1
+        return self.shape[0] == 1
 
     @property
     def is_col(self):
-        return self.shape[0] == 1
+        return self.shape[1] == 1
 
     @property
     def is_1D(self):
@@ -113,9 +122,9 @@ class XLRange:
         
     def __len__(self):
         if self.is_col:
-            return self.shape[1]
-        if self.is_row:
             return self.shape[0]
+        if self.is_row:
+            return self.shape[1]
         raise TypeError("length is only defined for 1D ranges")
 
     def __iter__(self):
@@ -127,33 +136,76 @@ class XLRange:
         
     def __getitem__(self, item):
         if is_int_type(item):
-            if item < 0:
-                item += len(self)
-            if self.is_row:
-                return self.start.translate(item, 0)
-            if self.is_col:
-                return self.start.translate(0, item)
-            else:
+
+            if not self.is_1D:
                 raise TypeError("Can only do integer lookups on 1D ranges")
 
+            elif item < 0:
+                item += len(self)
+
+            if self.is_row:
+                return self.start.translate(0, item)
+            else:
+                return self.start.translate(item, 0)
+
         elif isinstance(item, slice):
+            item = fill_slice(item)
+            if item.step != 1:
+                raise TypeError("Can only slice with step equal to 1")
+
             start, stop = item.start, (item.stop or 0) - 1
+
             return self[start] - self[stop]
 
         elif is_bool_indexer(item):
-            start = min((i for i, bool in enumerate(item) if bool == True))
-            stop = max((i for i, bool in enumerate(item) if bool == True))
-            return self[start, stop]
+
+            if not self.is_1D:
+                raise TypeError("Can only use Boolean indexers on 1D ranges")
+
+            true_positions = list(i for i, bool_ in enumerate(item) if bool_ == True)
+
+            start = min(true_positions)
+            stop = max(true_positions)
+
+            step_is_1 = (stop - start) / len(true_positions) == 1
+
+            if not step_is_1:
+                raise TypeError("Bool indexers can't have any holes in (i.e. equivalent as slice must have step=1)")
+
+            return self[start:stop]
 
         elif len(item) == 2:
+
             row_slice, col_slice = item
+
             if is_int_type(row_slice) and is_int_type(col_slice):
+
+                if row_slice < 0:
+                    row_slice += self.shape[0]
+                if col_slice < 0:
+                    col_slice += self.shape[1]
+
                 return self.start.translate(row_slice, col_slice)
+
             elif isinstance(row_slice, slice) and isinstance(col_slice, slice):
+                row_slice = fill_slice(row_slice)
+                col_slice = fill_slice(col_slice)
+
+                row_stop = row_slice.stop
+                if row_slice.stop < 0:
+                    row_stop += self.shape[0]
+
+                col_stop = col_slice.stop
+                if col_slice.stop < 0:
+                    col_stop += self.shape[1]
+
                 return XLRange(self.start.translate(row_slice.start, col_slice.start),
-                               self.stop.translate(-row_slice.stop, -col_slice.stop))
-        else:
-            raise TypeError("Excpecting tuple of slices, boolean indexer, or an index or a slice if 1D, not {}".format(item))
+                               self.start.translate(row_stop, col_stop))
+
+        raise TypeError("Expecting tuple of slices, boolean indexer, or an index or a slice if 1D, not {}".format(item))
+
+    def __eq__(self, other):
+        return self.start == other.start and self.stop == other.stop
 
     def copy(self):
         return self.start.copy() - self.stop.copy()

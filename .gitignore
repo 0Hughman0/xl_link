@@ -55,4 +55,4 @@ Temporary Items
 # Pyc
 *.pyc
 
-/test_cases
+/tests/test_cases
