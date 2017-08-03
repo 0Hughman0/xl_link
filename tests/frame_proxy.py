@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 from openpyxl import load_workbook
 
-from xl_link import EmbededFrame
+from xl_link import EmbeddedFrame
 
 
 TEST_CASE_FOLDER = Path("./tests/test_cases")
@@ -31,7 +31,7 @@ def case_factory(name, to_excel_args, to_excel_kwargs, f):
         def setUpClass(cls):
             cls.to_excel_args = to_excel_args
             cls.to_excel_kwargs = to_excel_kwargs
-            cls.f = EmbededFrame(f)
+            cls.f = EmbeddedFrame(f)
             cls.__name__ = name
 
         def has_index_type(self, type):

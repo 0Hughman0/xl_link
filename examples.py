@@ -1,9 +1,9 @@
 import pandas as pd
-from xl_link import EmbededFrame
+from xl_link import EmbeddedFrame
 
-# Create EmbededFrame
-calories_per_meal = EmbededFrame(pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
-                                 data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+# Create EmbeddedFrame
+calories_per_meal = EmbeddedFrame(pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
+                                               data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                                        'Mon': (15, 20, 12, 3),
                                        'Tues': (5, 16, 3, 0),
                                        'Weds': (3, 22, 2, 8),
