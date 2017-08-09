@@ -1,1 +1,1 @@
-from .xl_link import EmbeddedFrame
+from .mappers import EmbeddedFrame
