@@ -22,14 +22,14 @@ class XLCell:
     Represents a cell in an Excel spreadsheet
     """
 
-    def __init__(self, sheet, row, col):
+    def __init__(self, row, col, sheet='Sheet1'):
         self.sheet = sheet
         self.row = row
         self.col = col
 
     @classmethod
     def from_cell(cls, cell, sheet="Sheet 1"):
-        return XLCell(sheet, *xl_cell_to_rowcol(cell))
+        return XLCell(*xl_cell_to_rowcol(cell), sheet)
 
     @property
     def cell(self):
@@ -64,7 +64,7 @@ class XLCell:
         return "<XLCell: {}>".format(self.cell)
 
     def copy(self):
-        return XLCell(self.sheet, self.row, self.col)
+        return XLCell(self.row, self.col, self.sheet)
 
     def translate(self, row, col):
         cell = self.copy()
@@ -72,6 +72,8 @@ class XLCell:
         cell.col += col or 0
         return cell
 
+    def __hash__(self):
+        return hash((self.row, self.col, self.sheet))
 
 class XLRange:
     """
@@ -153,7 +155,7 @@ class XLRange:
             if item.step != 1:
                 raise TypeError("Can only slice with step equal to 1")
 
-            start, stop = item.start, (item.stop or 0) - 1
+            start, stop = item.start, (item.stop) - 1
 
             return self[start] - self[stop]
 
@@ -209,4 +211,15 @@ class XLRange:
 
     def copy(self):
         return self.start.copy() - self.stop.copy()
+
+    def __hash__(self):
+        return hash((self.start.row, self.start.col, self.stop.row, self.stop.row, self.sheet))
+
+    def translate(self, row, col):
+        new = self.copy()
+
+        new.start = new.start.translate(row, col)
+        new.stop = new.stop.translate(row, col)
+
+        return new
 

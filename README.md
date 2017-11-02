@@ -2,58 +2,84 @@
 
 Love the fancy pandas indexing and slicing, but frustrated when writing to Excel, and loosing all that functionality?
 
-Fear not! XLLink solves this by returning a 'proxy' frame object upon use of to_excel
+Fear not! XLLink solves this by returning an XLMap object upon use of to_excel
 
-This frame can be sliced and indexed just like your original frame, but at any point you can call:
+This map supports all your favourite indexing methods, i.e. loc, iloc, at and iat (*ahem and ix... booooo!), but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
 
-    obj.xl -> XLRange or XLCell
+XLCell and XLRange objects can return their location in excel notation via XLCell.cell and XLRange.range respectively:
 
-This will return an XLRange or XLCell object that represents the range or cell that object takes up on your spreadsheet.
+    >>> first_temp_cell = XLCell(1, 1)
+    >>> last_temp_cell = XLCell(1, 10)
+    >>> temp_col = first_temp_cell - last_temp_cell (or could use XLRange(first_temp_cell, last_temp_cell))
+    >>> first_temp_cell
+        <XLCell: B2>
+    >>> first_temp_cell.cell
+        'B2'
+    >>> temp_col
+        <XLRange: B2:B11>
+    >>> temp_col.range
+        'B2:B11'
 
-These can then be turning into excel notation with either:
+For convenience add the f prefix for a formula compatible version:
 
-    obj.xl.range -> <XLRange A1:C5> (for ranges)
-    obj.xl.cell  -> <XLCell C5> (for cells)
+    >>> first_temp.fcell
+        "'Sheet1'!B11"
+    >>> temp_col.frange
+        "'Sheet1'!B2:B11"
 
-For convenience add the f prefix for a formula compatible version
+But rather than creating these XLCells and XLRanges from scratch, just let xl_link do it for you!:
 
-    obj.xl.frange -> "Sheet1"!A1:C5
-    obj.xl.cell   -> C5
+    >>> print(f)
+                            Mon                  Tues      Weds       Thur
+        Meal
+        Breakfast         Toast                 Bagel    Cereal  Croissant
+        Lunch              Soup  Something Different!      Rice     Hotpot
+        Dinner            Curry                  Stew     Pasta    Gnocchi
+        Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
 
-Example:
+    >>> map = xl_link.write_frame(f, "t.xlsx")
+    >>> map
+        <XLMap: index: <XLRange: A2:A5>, columns: <XLRange: B1:E1>, data: <XLRange: B2:E5>>
 
-    In[3]: print(f)
-    Out[3]:
-                        Mon                  Tues      Weds       Thur
-    Meal
-    Breakfast         Toast                 Bagel    Cereal  Croissant
-    Lunch              Soup  Something Different!      Rice     Hotpot
-    Dinner            Curry                  Stew     Pasta    Gnocchi
-    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
+    >>> map.index
+        <XLRange: A2:A5>
 
-    In[7]: i = f.to_excel("t.xlsx")
-    In[8]: i
-    Out[8]:
-                             Mon          Tues          Weds          Thur
-    Meal
-    Breakfast       <XLCell: B2>  <XLCell: C2>  <XLCell: D2>  <XLCell: E2>
-    Lunch           <XLCell: B3>  <XLCell: C3>  <XLCell: D3>  <XLCell: E3>
-    Dinner          <XLCell: B4>  <XLCell: C4>  <XLCell: D4>  <XLCell: E4>
-    Midnight Snack  <XLCell: B5>  <XLCell: C5>  <XLCell: D5>  <XLCell: E5>
+    >>> map.columns
+        <XLRange: B1:E1>
 
-    In[10]: i.index.xl
-    Out[10]: <XLRange: A2:A5>
+    >>> map.loc["Lunch", :]
+        <XLRange: B3:E3>
 
-    In[11]: i.columns.xl
-    Out[11]: <XLRange: B1:E1>
+For convenience, you can access a copy of the frame f, as it was written to excel:
 
-    In[9]: i.loc["Lunch", :].xl
-    Out[9]: <XLRange: B3:E3>
+    >>> f.loc['Lunch'] = "Nom Nom Nom"
+    >>> f
+                                Mon         Tues         Weds         Thur
+        Meal
+        Breakfast             Toast        Bagel       Cereal    Croissant
+        Lunch           Nom Nom Nom  Nom Nom Nom  Nom Nom Nom  Nom Nom Nom
+        Dinner                Curry         Stew        Pasta      Gnocchi
+        Midnight Snack      Shmores      Cookies     Biscuits    Chocolate
+
+    >>> map.f # Preserved :)
+                            Mon                  Tues      Weds       Thur
+        Meal
+        Breakfast         Toast                 Bagel    Cereal  Croissant
+        Lunch              Soup  Something Different!      Rice     Hotpot
+        Dinner            Curry                  Stew     Pasta    Gnocchi
+        Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
 
 
-This really starts to look nice when using something like xlsxwriter.
+This all comes together to look nice when using something like xlsxwriter.
+Allowing for something like:
 
-For example, to create without XLWriter can look like:
+    for time in map.f.index:
+        xl_linked_chart.add_series({
+                            'name': time,
+                            'categories': proxy.columns.frange,
+                            'values': proxy.loc[time].frange})
+
+Compared to:
 
     for col_num in range(1, len(calories_per_meal.index) + 1):
         without_chart.add_series({
@@ -61,13 +87,5 @@ For example, to create without XLWriter can look like:
             'categories': ["Without", 0, 1, 0, 4],
             'values':     ["Without", col_num, 1, col_num, 4]})
 
-which to me looks pretty ugly and confusing. Instead with XLLink this becomes:
+Hopefully you agree that the former is far more appealing.
 
-
-    for time in calories_per_meal.index:
-        xl_linked_chart.add_series({
-                            'name': time,
-                            'categories': proxy.columns.xl.frange,
-                            'values': proxy.loc[time].xl.frange})
-
-NOTE: This is still in early stages and not fully tested. Please report any bugs for squishing, or help out! Check if your usage case is covered in test.py!

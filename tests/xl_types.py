@@ -26,7 +26,7 @@ class XLCellConstructorTestCase(unittest.TestCase):
     xlcell = xl_rowcol_to_cell(row, col)
 
     def setUp(self):
-        self.from_init = xl_types.XLCell(self.sheet, self.row, self.col)
+        self.from_init = xl_types.XLCell(self.row, self.col, self.sheet)
         self.from_cell = xl_types.XLCell.from_cell(self.xlcell, self.sheet)
 
     def test_init(self):
@@ -48,7 +48,7 @@ def xl_cell_case_factory(row, col, sheetname):
     class XLCellCaseFactory(unittest.TestCase):
 
         def setUp(self):
-            self.cell = xl_types.XLCell(sheetname, row, col)
+            self.cell = xl_types.XLCell(row, col, sheetname)
 
         def test_cell_location(self):
             self.assertSequenceEqual(rowcol, [self.cell.row, self.cell.col])
@@ -75,7 +75,7 @@ def xl_cell_case_factory(row, col, sheetname):
                 self.assertNotEqual(new_position_cell, self.cell.cell)
 
         def test_equal(self):
-            other = xl_types.XLCell(sheetname, row, col)
+            other = xl_types.XLCell(row, col, sheetname)
             self.assertEqual(self.cell, other)
             self.assertEqual(self.cell, xlcell)
             self.assertNotEqual(self.cell, self.cell.translate(0, 1))
@@ -100,8 +100,8 @@ def xl_cell_case_factory(row, col, sheetname):
 
 def xl_range_case_factory(start_rowcol, stop_rowcol, sheetname):
 
-    start_cell = xl_types.XLCell(sheetname, *start_rowcol)
-    stop_cell = xl_types.XLCell(sheetname, *stop_rowcol)
+    start_cell = xl_types.XLCell(*start_rowcol, sheetname)
+    stop_cell = xl_types.XLCell(*stop_rowcol, sheetname)
 
     is_2D = True
     is_col = False
@@ -181,7 +181,7 @@ def xl_range_case_factory(start_rowcol, stop_rowcol, sheetname):
 
         def test_getitem_bool_indexer(self):
             try:
-                self.range[np.array([0, True, True, True], dtype=bool)]
+                self.range[np.array([False, True, True, True], dtype=bool)]
             except Exception as e:
                 self.assertEqual(str(e), "Can only use Boolean indexers on 1D ranges")
 

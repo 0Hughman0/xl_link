@@ -55,4 +55,6 @@ Temporary Items
 # Pyc
 *.pyc
 
+# Excel files
 /tests/test_cases
+/env

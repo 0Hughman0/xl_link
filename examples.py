@@ -1,18 +1,19 @@
 import pandas as pd
-from xl_link import EmbeddedFrame
+from xl_link import write_frame
+
 
 # Create EmbeddedFrame
-calories_per_meal = EmbeddedFrame(pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
-                                               data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+calories_per_meal = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
+                                 data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                                        'Mon': (15, 20, 12, 3),
                                        'Tues': (5, 16, 3, 0),
                                        'Weds': (3, 22, 2, 8),
-                                       'Thur': (6, 7, 1, 9)}))
+                                       'Thur': (6, 7, 1, 9)})
 calories_per_meal.set_index("Meal", drop=True, inplace=True)
 
 # Write to excel
 writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-proxy = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+map = write_frame(calories_per_meal, writer, {'sheet_name': "XLLinked"}) # returns the 'ProxyFrame'
 
 # Create chart with XLLink ############################################################################################
 
@@ -22,10 +23,10 @@ xl_linked_chart = workbook.add_chart({'type': 'column'})
 
 for time in calories_per_meal.index:
     xl_linked_chart.add_series({'name': time,
-                      'categories': proxy.columns.xl.frange,
-                      'values': proxy.loc[time].xl.frange})
+                      'categories': map.columns.frange,
+                      'values': map.loc[time].frange})
 
-right_of_table = proxy.columns.xl[-1].translate(0, 1)
+right_of_table = map.columns[-1].translate(0, 1)
 xl_linked_sheet.insert_chart(right_of_table.cell, xl_linked_chart)
 
 """
@@ -53,6 +54,3 @@ Overly complex, confusing, hard to change
 """
 
 ######################################################################################################################
-
-writer.save()
-

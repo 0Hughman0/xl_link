@@ -1,1 +1,1 @@
-from .mappers import EmbeddedFrame
+from .mappers import write_frame
