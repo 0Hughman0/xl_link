@@ -150,8 +150,8 @@ class SelectorProxy:
         self.mapper_frame = mapper_frame
         self.selector_name = selector_name
 
-    def __getitem__(self, item):
-        val = getattr(self.mapper_frame, self.selector_name)[item]
+    def __getitem__(self, key):
+        val = getattr(self.mapper_frame, self.selector_name)[key]
 
         if isinstance(val, pd.Series):
             return val.values[0] - val.values[-1]
@@ -243,9 +243,21 @@ class XLMap:
     def __repr__(self):
         return "<XLMap: index: {}, columns: {}, data: {}>".format(self.index, self.columns, self.data)
 
-    def __getitem__(self, item):
-        i = self.columns.get_loc(item)
-        return self.columns.xl[i]
+    def __getitem__(self, key):
+        try:
+            i = self.f.columns.get_loc(key)
+            return self.columns[i]
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+
+        try:
+            i = slice(*self.f.columns.slice_locs(key[0], key[-1]))
+        except TypeError:
+            raise TypeError("Cannot interpret key: {}".format(key))
+
+        return self.columns[i]
 
     @property
     def loc(self):
