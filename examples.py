@@ -1,19 +1,18 @@
 import pandas as pd
-from xl_link import write_frame
+from xl_link import XLDataFrame
 
 
 # Create EmbeddedFrame
-calories_per_meal = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
-                                 data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                                       'Mon': (15, 20, 12, 3),
+calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
+                                 index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+                                 data={'Mon': (15, 20, 12, 3),
                                        'Tues': (5, 16, 3, 0),
                                        'Weds': (3, 22, 2, 8),
                                        'Thur': (6, 7, 1, 9)})
-calories_per_meal.set_index("Meal", drop=True, inplace=True)
 
 # Write to excel
 writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-map = write_frame(calories_per_meal, writer, {'sheet_name': "XLLinked"}) # returns the 'ProxyFrame'
+map = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
 
 # Create chart with XLLink ############################################################################################
 

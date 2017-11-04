@@ -7,7 +7,6 @@ except ImportError:
 
 from .xl_types import XLCell
 
-
 def get_xl_ranges(frame_index, frame_columns,
                   sheet_name='Sheet1',
                   columns=None,
@@ -182,6 +181,8 @@ class XLMap:
     >>> map.loc['Mon':'Tues', :].index
         AttributeError: 'XLRange' object has no attribute 'index'
 
+    >>> map.index['Mon':'Tues'] # Doesn't work because index is not a Pandas Index, but an XLRange.
+        TypeError: unsupported operand type(s) for -: 'str' and 'int'
 
     Parameters
     ----------
@@ -191,7 +192,6 @@ class XLMap:
     f: Pandas DataFrame that has been written to excel.
 
     Recommended to not be created directly, instead via, xl_link.write_frame(f, excel_writer, **kwargs)
-
 
     Examples
     --------
@@ -244,6 +244,24 @@ class XLMap:
         return "<XLMap: index: {}, columns: {}, data: {}>".format(self.index, self.columns, self.data)
 
     def __getitem__(self, key):
+        """
+        Emulates DataFrame.__getitem__ (DataFrame[key] syntax), see Pandas DataFrame indexing for help on behaviour.
+
+        Will return the location of the columns found, rather than the underlying data.
+
+        Parameters
+        ----------
+        key : hashable or array-like of hashables, corresponding to the names of the columns desired.
+
+        Returns
+        -------
+        XLRange corresponding to position of found colummn(s) within spreadsheet
+
+        Example
+        -------
+        >>> map['Col 1']
+            <XLRange: B2:B10>
+        """
         try:
             i = self.f.columns.get_loc(key)
             return self.columns[i]
@@ -270,11 +288,10 @@ class XLMap:
         -------
         XLCell or XLRange corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
 
-
         Example
         -------
         >>> map.loc['Tues']
-            <XLRange A2:D2>
+            <XLRange: A2:D2>
         """
         return SelectorProxy(self._mapper_frame, 'loc')
 
@@ -292,7 +309,7 @@ class XLMap:
         Example
         -------
         >>> map.iloc[3, :]
-            <XLRange A2:D2>
+            <XLRange: A2:D2>
         """
         return SelectorProxy(self._mapper_frame, 'iloc')
 
@@ -348,6 +365,47 @@ class XLMap:
         Example
         -------
         >>> map.at["Mon", "Lunch"]
-            <XLCell C3>
+            <XLCell: C3>
         """
         return SelectorProxy(self._mapper_frame, 'at')
+
+
+class XLDataFrame(pd.DataFrame):
+    """
+    
+    XLDataFrame - standard DataFrame monkeypatched to return xl_link.XLMap upon use of to_excel
+    
+    """
+
+    __doc__ += pd.DataFrame.__doc__
+
+    @property
+    def _constructor(self):
+        return XLDataFrame
+
+    def to_excel(self, excel_writer, sheet_name='Sheet1', na_rep='',
+                 float_format=None, columns=None, header=True, index=True,
+                 index_label=None, startrow=0, startcol=0, engine=None,
+                 merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
+                 freeze_panes=None):
+        super().to_excel(excel_writer, sheet_name='Sheet1', na_rep='',
+                 float_format=None, columns=None, header=True, index=True,
+                 index_label=None, startrow=0, startcol=0, engine=None,
+                 merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
+                 freeze_panes=None)
+
+        data_range, index_range, col_range, _ = get_xl_ranges(self.index, self.columns,
+                                                              sheet_name=sheet_name,
+                                                              columns=columns,
+                                                              header=header,
+                                                              index=index,
+                                                              index_label=index_label,
+                                                              startrow=startrow,
+                                                              startcol=startcol,
+                                                              merge_cells=merge_cells)
+        f = self.copy()
+
+        if isinstance(columns, list) or isinstance(columns, tuple):
+            f = f[columns]
+
+        return XLMap(data_range, index_range, col_range, f)

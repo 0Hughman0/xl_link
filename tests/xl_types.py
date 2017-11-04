@@ -77,7 +77,7 @@ def xl_cell_case_factory(row, col, sheetname):
         def test_equal(self):
             other = xl_types.XLCell(row, col, sheetname)
             self.assertEqual(self.cell, other)
-            self.assertEqual(self.cell, xlcell)
+            self.assertEqual(self.cell.cell, xlcell)
             self.assertNotEqual(self.cell, self.cell.translate(0, 1))
             self.assertNotEqual(self.cell, self.cell.translate(1, 0))
 
