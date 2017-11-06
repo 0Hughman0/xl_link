@@ -1,15 +1,13 @@
-import unittest
 import json
+import unittest
 from abc import abstractmethod
 
+import numpy as np
 from openpyxl import load_workbook
 from openpyxl.chart.reference import Reference
 
-from xlsxwriter.utility import xl_rowcol_to_cell
-
-import numpy as np
-
 from xl_link import xl_types
+from xl_link.xlsxwriter.utility import xl_rowcol_to_cell
 
 test_workbook = load_workbook(r"./tests/test_cases/XLTypesTestGrid.xlsx")
 

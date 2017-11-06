@@ -12,7 +12,7 @@ calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
 
 # Write to excel
 writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-map = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
 
 # Create chart with XLLink ############################################################################################
 
@@ -22,10 +22,10 @@ xl_linked_chart = workbook.add_chart({'type': 'column'})
 
 for time in calories_per_meal.index:
     xl_linked_chart.add_series({'name': time,
-                      'categories': map.columns.frange,
-                      'values': map.loc[time].frange})
+                      'categories': xlmap.columns.frange,
+                      'values': xlmap.loc[time].frange})
 
-right_of_table = map.columns[-1].translate(0, 1)
+right_of_table = xlmap.columns[-1].translate(0, 1)
 xl_linked_sheet.insert_chart(right_of_table.cell, xl_linked_chart)
 
 """
@@ -53,3 +53,11 @@ Overly complex, confusing, hard to change
 """
 
 ######################################################################################################################
+
+f = calories_per_meal
+
+chart = xlmap.create_chart('bar', 'Mon')
+
+writer.sheets['XLLinked'].insert_chart('A1', chart)
+
+writer.save()

@@ -5,7 +5,10 @@ try:
 except ImportError:
     from pandas.formats.format import ExcelFormatter
 
+from pandas.io.common import _stringify_path
+
 from .xl_types import XLCell
+from .chart_wrapper import create_chart
 
 def get_xl_ranges(frame_index, frame_columns,
                   sheet_name='Sheet1',
@@ -178,10 +181,10 @@ class XLMap:
     or an XLRange. The only workaround is to reduce the size of your DataFrame BEFORE you call write_frame.
     This limitation drastically simplifies the implementation. Examples of what WON'T WORK:
 
-    >>> map.loc['Mon':'Tues', :].index
+    >>> xlmap.loc['Mon':'Tues', :].index
         AttributeError: 'XLRange' object has no attribute 'index'
 
-    >>> map.index['Mon':'Tues'] # Doesn't work because index is not a Pandas Index, but an XLRange.
+    >>> xlmap.index['Mon':'Tues'] # Doesn't work because index is not a Pandas Index, but an XLRange.
         TypeError: unsupported operand type(s) for -: 'str' and 'int'
 
     Parameters
@@ -205,7 +208,7 @@ class XLMap:
 
     # Write to excel
     writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-    map = write_frame(calories_per_meal, writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+    xlmap = write_frame(calories_per_meal, writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
 
     # Create chart with XLLink
     workbook = writer.book
@@ -218,12 +221,14 @@ class XLMap:
                       'values': proxy.loc[time].frange})
     """
 
-    def __init__(self, data_range, index_range, column_range, f):
+    def __init__(self, data_range, index_range, column_range, f, writer=None):
         self.index = index_range
         self.columns = column_range
 
         self.data = data_range
         self._f = f.copy()
+        self.writer = writer
+
         self._mapper_frame = f.copy().astype(XLCell)
 
         x_range = self._f.index.size
@@ -243,6 +248,54 @@ class XLMap:
     def __repr__(self):
         return "<XLMap: index: {}, columns: {}, data: {}>".format(self.index, self.columns, self.data)
 
+    def create_chart(self, type_, values=None, categories=None, names=None, subtype=None, writer=None):
+        """
+        Create excel chart object based off of data within the Frame.
+
+        Parameters
+        ----------
+        type_ : str Type of chart to create.
+        values : object, label or list of labels to corresponding to column to use as
+            values for each series in chart.
+        categories : object, label or list of labels to corresponding to column to use
+            as categories for each series in chart.
+        names : object, label or list of labels to corresponding to name of each series in chart.
+        engine : str one of xlsxwriter... corresponding used to determine what chart object to make.
+
+        Returns
+        -------
+
+        Chart object corresponding to the engine selected
+
+        """
+        if writer is None:
+            writer = self.writer
+
+        if names is None:
+            names = tuple(cell for cell in self.index)
+        else:
+            if isinstance(names, str):
+                names = tuple(cell for cell in self[names])
+
+        if categories is None:
+            categories = self.columns
+        else:
+            if isinstance(categories, list) or isinstance(categories, tuple):
+                categories = list(self[category] for category in categories)
+            else:
+                categories = self[categories]
+
+        if values is None:
+            values = tuple(self[label] for label in self.f.columns)
+        else:
+            if isinstance(values, list) or isinstance(values, tuple):
+                values = list(self[value] for value in values)
+            else:
+                values = self[values]
+
+
+        return create_chart(self, writer, type_, values, categories, names, subtype)
+
     def __getitem__(self, key):
         """
         Emulates DataFrame.__getitem__ (DataFrame[key] syntax), see Pandas DataFrame indexing for help on behaviour.
@@ -259,23 +312,17 @@ class XLMap:
 
         Example
         -------
-        >>> map['Col 1']
+        >>> xlmap['Col 1']
             <XLRange: B2:B10>
         """
-        try:
-            i = self.f.columns.get_loc(key)
-            return self.columns[i]
-        except KeyError:
-            pass
-        except TypeError:
-            pass
+        val = self._mapper_frame[key]
 
-        try:
-            i = slice(*self.f.columns.slice_locs(key[0], key[-1]))
-        except TypeError:
-            raise TypeError("Cannot interpret key: {}".format(key))
+        if isinstance(val, pd.Series):
+            return val.values[0] - val.values[-1]
 
-        return self.columns[i]
+        if isinstance(val, pd.DataFrame):
+
+            return val.values[0, 0] - val.values[-1, -1]
 
     @property
     def loc(self):
@@ -290,7 +337,7 @@ class XLMap:
 
         Example
         -------
-        >>> map.loc['Tues']
+        >>> xlmap.loc['Tues']
             <XLRange: A2:D2>
         """
         return SelectorProxy(self._mapper_frame, 'loc')
@@ -308,7 +355,7 @@ class XLMap:
 
         Example
         -------
-        >>> map.iloc[3, :]
+        >>> xlmap.iloc[3, :]
             <XLRange: A2:D2>
         """
         return SelectorProxy(self._mapper_frame, 'iloc')
@@ -327,7 +374,7 @@ class XLMap:
 
         Example
         -------
-        >>> map.ix[3, :]
+        >>> xlmap.ix[3, :]
             <XLRange A2:D2>
         """
         return SelectorProxy(self._mapper_frame, 'ix')
@@ -345,7 +392,7 @@ class XLMap:
 
         Example
         -------
-        >>> map.iat[3, 2]
+        >>> xlmap.iat[3, 2]
             <XLCell C3>
         """
         return SelectorProxy(self._mapper_frame, 'iat')
@@ -364,17 +411,48 @@ class XLMap:
 
         Example
         -------
-        >>> map.at["Mon", "Lunch"]
+        >>> xlmap.at["Mon", "Lunch"]
             <XLCell: C3>
         """
         return SelectorProxy(self._mapper_frame, 'at')
 
 
+to_excel_doc_start = """
+
+------------------------------------------------------------------------------------------------------------------------
+
+Monkeypatched by xl_link! Changes:
+
+Returns
+-------
+        
+xl_link.XLMap corresponding to position of frame as it appears in excel (see XLMap for details)
+
+------------------------------------------------------------------------------------------------------------------------
+
+Pandas Docstring:
+ 
+"""
+
+
 class XLDataFrame(pd.DataFrame):
     """
-    
-    XLDataFrame - standard DataFrame monkeypatched to return xl_link.XLMap upon use of to_excel
-    
+
+    ------------------------------------------------------------------------------------------------------------------------
+
+    Monkeypatched by xl_link! Changes:
+
+    to_excel modified to return an XLMap.
+
+    XLDataFrame._constructor set to XLDataFrame -> stops reverting to normal DataFrame
+
+    Note: Conversions from this DataFrame to Series or Panels will return regular Panels and Series,
+    which will convert back into regular DataFrame's upon expanding/ reducing dimensions.
+
+    ------------------------------------------------------------------------------------------------------------------------
+
+    Pandas Docstring:
+
     """
 
     __doc__ += pd.DataFrame.__doc__
@@ -388,11 +466,23 @@ class XLDataFrame(pd.DataFrame):
                  index_label=None, startrow=0, startcol=0, engine=None,
                  merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
                  freeze_panes=None):
-        super().to_excel(excel_writer, sheet_name='Sheet1', na_rep='',
-                 float_format=None, columns=None, header=True, index=True,
-                 index_label=None, startrow=0, startcol=0, engine=None,
-                 merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
-                 freeze_panes=None)
+
+        if isinstance(excel_writer, pd.ExcelWriter):
+            need_save = False
+        else:
+            excel_writer = pd.ExcelWriter(_stringify_path(excel_writer), engine=engine)
+            need_save = True
+
+        super().to_excel(excel_writer, sheet_name=sheet_name, na_rep=na_rep,
+                 float_format=float_format, columns=columns, header=header, index=index,
+                 index_label=index_label, startrow=startrow, startcol=startcol, engine=engine,
+                 merge_cells=merge_cells, encoding=encoding, inf_rep=inf_rep, verbose=verbose,
+                 freeze_panes=freeze_panes)
+
+        if need_save:
+            excel_writer.save()
+
+        XLDataFrame.to_excel.__doc__ = to_excel_doc_start + super().to_excel.__doc__
 
         data_range, index_range, col_range, _ = get_xl_ranges(self.index, self.columns,
                                                               sheet_name=sheet_name,
@@ -408,4 +498,4 @@ class XLDataFrame(pd.DataFrame):
         if isinstance(columns, list) or isinstance(columns, tuple):
             f = f[columns]
 
-        return XLMap(data_range, index_range, col_range, f)
+        return XLMap(data_range, index_range, col_range, f, writer=excel_writer)

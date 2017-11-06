@@ -38,7 +38,7 @@ def case_factory(name, to_excel_kwargs, f):
 
         def setUp(self):
             file_name = path_for("{}.xlsx".format(self.__class__.__name__))
-            kwargs = {'engine':"xlsxwriter"}
+            kwargs = {'engine':"openpyxl"}
             kwargs.update(self.to_excel_kwargs)
             self.frame_proxy = write_frame(self.f, file_name, kwargs)
             self.workbook = load_workbook(file_name)

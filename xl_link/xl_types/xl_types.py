@@ -1,5 +1,6 @@
-from xlsxwriter.utility import xl_rowcol_to_cell, xl_cell_to_rowcol
 from pandas.core.common import is_bool_indexer
+
+from xl_link.xlsxwriter.utility import xl_rowcol_to_cell, xl_cell_to_rowcol
 
 
 def is_int_type(i):
