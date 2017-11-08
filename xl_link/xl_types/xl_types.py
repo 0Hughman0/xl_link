@@ -330,6 +330,10 @@ class XLRange:
     def is_1D(self):
         return self.is_row or self.is_col
 
+    @property
+    def is_2D(self):
+        return not self.is_1D
+
     def __repr__(self):
         return "<XLRange: {}>".format(self.frange)
 
@@ -448,6 +452,19 @@ class XLRange:
                                self.start.translate(row_stop, col_stop))
 
         raise TypeError("Expecting tuple of slices, boolean indexer, or an index or a slice if 1D, not {}".format(key))
+
+    def iterrows(self):
+        """
+        Iterate over each row of self, yields each row as XLRange
+        Yields
+        -------
+        XLRange corresponding to current row
+        """
+        if not self.is_2D:
+            raise TypeError("Can only call iterrows on 2D ranges")
+
+        for x in range(self.shape[0]):
+            yield self[x, 0] - self[x, -1]
 
     def __eq__(self, other):
         return self.start == other.start and self.stop == other.stop

@@ -1,3 +1,14 @@
+"""
+Tests for XLRange and XLCell
+
+Note
+----
+The XLRange and XLCell classes build on code from xlsxwriter (see xlsx writer folder), functions from xlsxwriter
+are not tested, but are used.
+
+These tests build upon openpyxl, and work on the assumption that those modules are functional.
+"""
+
 import json
 import unittest
 from abc import abstractmethod
@@ -204,6 +215,16 @@ def xl_range_case_factory(start_rowcol, stop_rowcol, sheetname):
             self.assertEqual(mid_slice, one_in)
 
             self.assertRaises(TypeError, self.range.__getitem__, "A1")
+
+        def test_iterrows(self):
+            start_cell
+            top_right = start_cell.copy()
+            top_right.col = stop_cell.col
+
+            for row_range in self.range.iterrows():
+                self.assertEqual(row_range, start_cell-top_right)
+                start_cell.row += 1
+                top_right.row += 1
 
 
     class XLRangeColFactory(XLRangeBaseFactoryCase):

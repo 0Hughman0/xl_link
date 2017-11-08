@@ -15,13 +15,15 @@ def ensure_list(specifier):
 
     return specifier
 
+def type_to_openpyxl_chart_name(type):
+    return type.title() + 'Chart'
+
 
 class AbstractChartWrapper:
 
-    def __init__(self, xlmap, type_, writer, subtype=None):
-        self.xlmap = xlmap
+    def __init__(self, book, type_, subtype=None):
         self.type_ = type_
-        self.writer = writer
+        self.sheet = book
         self.subtype = subtype
 
     @abstractmethod
@@ -31,10 +33,10 @@ class AbstractChartWrapper:
 
 class XlsxWriterChartWrapper(AbstractChartWrapper):
 
-    def __init__(self, xlmap, type_, writer, subtype):
-        super().__init__(xlmap, type_, writer, subtype)
+    def __init__(self, book, type_, subtype):
+        super().__init__(book, type_, subtype)
 
-        self.chart = writer.book.add_chart({'type': type_, 'subtype': subtype} if subtype else {'type': type_})
+        self.chart = book.add_chart({'type': type_, 'subtype': subtype} if subtype else {'type': type_})
 
     def add_series(self, name, values, categories=None):
         values = "=" + values.frange
@@ -52,13 +54,31 @@ class XlsxWriterChartWrapper(AbstractChartWrapper):
 
 class OpenPyXLChartWrapper(AbstractChartWrapper):
 
-    pass
+    def __init__(self):
+        raise NotImplementedError
 
+def create_chart(workbook, engine, type_, values, categories, names, subtype=None):
+    """
+    Create a chart object corresponding to given engine, within sheet.
 
-def create_chart(xlmap, writer, type_, values, categories, names, subtype=None):
+    Parameters
+    ----------
+    workbook : workbook to insert chart into, currently only support XlsxWriter.Workbooks.
+    engine : str representing engine to use, currently only supports 'xlsxwriter'.
+    type_ : str representing chart type, see engine docs for options e.g. 'line'.
+    values : XLRange or sequence of XLRanges to use as values for each series/ data set (Excel equivalent to y data).
+    categories : XLRange or sequence of XLRanges, or str/ sequence of strings to use as categories for
+        each series/ data set (Excel equivalent to x data).
+    names : XLRange or sequence of XLRanges, or str/ sequence of strings to use as name for
+        each series/ data set (Excel uses this to label each dataset).
+    subtype : str representing chart subtype, see engine docs for details.
+
+    Returns
+    -------
+    chart object, corresponding to engine's chart type.
+    """
     print(values, names, categories)
 
-    engine = writer.engine
     values = ensure_list(values)
     categories = ensure_list(categories)
 
@@ -67,7 +87,7 @@ def create_chart(xlmap, writer, type_, values, categories, names, subtype=None):
         imported.append(engine)
 
     if engine == "xlsxwriter":
-        chart = XlsxWriterChartWrapper(xlmap, type_, writer, subtype)
+        chart = XlsxWriterChartWrapper(workbook, type_, subtype)
 
     if len(categories) == 1 and len(categories) < len(values):
         categories *= len(values)

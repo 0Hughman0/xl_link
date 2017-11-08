@@ -10,6 +10,7 @@ from pandas.io.common import _stringify_path
 from .xl_types import XLCell
 from .chart_wrapper import create_chart
 
+
 def get_xl_ranges(frame_index, frame_columns,
                   sheet_name='Sheet1',
                   columns=None,
@@ -101,38 +102,25 @@ def write_frame(f, excel_writer, to_excel_args=None):
     -------
     XLMap: Mapping that corresponds to the position in the spreadsheet that frame was written to.
     """
-    if to_excel_args is None:
-        to_excel_args = {}
+    xlf = XLDataFrame(f)
 
-    default_args = {'sheet_name':'Sheet1',
-                    'columns': None,
-                    'header': True,
-                    'index': True,
-                    'index_label': None,
-                    'startrow': 0,
-                    'startcol': 0,
-                    'merge_cells': True}
-    default_args.update(to_excel_args)
-    to_excel_args = default_args
-    f.to_excel(excel_writer, **to_excel_args)
+    return xlf.to_excel(excel_writer, **to_excel_args)
 
-    data_range, index_range, col_range, _ = get_xl_ranges(f.index, f.columns,
-                                                          sheet_name=to_excel_args['sheet_name'],
-                                                          columns=to_excel_args['columns'],
-                                                          header=to_excel_args['header'],
-                                                          index=to_excel_args['index'],
-                                                          index_label=to_excel_args['index_label'],
-                                                          startrow=to_excel_args['startrow'],
-                                                          startcol=to_excel_args['startcol'],
-                                                          merge_cells=to_excel_args['merge_cells'])
-    f = f.copy()
 
-    columns = to_excel_args['columns']
+def _mapper_to_xl(value):
+    """
+    Convert mapper frame result to XLRange or XLCell
+    """
+    if isinstance(value, XLCell):
+        return value
 
-    if isinstance(columns, list) or isinstance(columns, tuple):
-        f = f[columns]
+    if isinstance(value, pd.Series):
+        return value.values[0] - value.values[-1]
 
-    return XLMap(data_range, index_range, col_range, f)
+    if isinstance(value, pd.DataFrame):
+        return value.values[0, 0] - value.values[-1, -1]
+
+    raise TypeError("Could not conver {} to XLRange or XLCell".format(value))
 
 
 class SelectorProxy:
@@ -155,14 +143,7 @@ class SelectorProxy:
     def __getitem__(self, key):
         val = getattr(self.mapper_frame, self.selector_name)[key]
 
-        if isinstance(val, pd.Series):
-            return val.values[0] - val.values[-1]
-
-        if isinstance(val, pd.DataFrame):
-
-            return val.values[0, 0] - val.values[-1, -1]
-
-        return val
+        return _mapper_to_xl(val)
 
 
 class XLMap:
@@ -293,8 +274,7 @@ class XLMap:
             else:
                 values = self[values]
 
-
-        return create_chart(self, writer, type_, values, categories, names, subtype)
+        return create_chart(writer.book, 'xlsxwriter', type_, values, categories, names, subtype)
 
     def __getitem__(self, key):
         """
@@ -317,12 +297,7 @@ class XLMap:
         """
         val = self._mapper_frame[key]
 
-        if isinstance(val, pd.Series):
-            return val.values[0] - val.values[-1]
-
-        if isinstance(val, pd.DataFrame):
-
-            return val.values[0, 0] - val.values[-1, -1]
+        return _mapper_to_xl(val)
 
     @property
     def loc(self):

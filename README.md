@@ -93,7 +93,7 @@ Here are some more indexing examples:
     >>> xlmap['Mon']
         <XLCell: 'Demo Sheet'!B8>
     >>> xlmap[['Mon', 'Tues', 'Weds']]
-        <XLRange: 'Demo Sheet'!B8:E8>
+        <XLRange: 'Demo Sheet'!B2:D5>
 
 For convenience, you can access a copy of the frame f, in it's state as it was written to excel:
 
