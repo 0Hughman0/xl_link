@@ -8,7 +8,7 @@ This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and 
 
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
-    xlmap = xl_link.write_frame(f, "t.xlsx")
+    xlmap = f.to_excel("t.xlsx")
 
     for time in xlmap.f.index:
         xl_linked_chart.add_series({
@@ -27,10 +27,11 @@ Compared to:
 Hopefully you agree that the former is far more appealing.
 
 This mysterious xlmap is an XLMap object, that represents the DataFrame f, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.
+xl_link provides the class XLDataFrame, which subtly modifies to behaviour to to_excel to return and XLMap object
 
 Let's look at XLMap with a more detailed example:
 
-    >>> f = pd.DataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
+    >>> f = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
                          index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                          data={'Mon': (15, 20, 12, 3),
                                'Tues': (5, 16, 3, 0),
@@ -43,7 +44,7 @@ Let's look at XLMap with a more detailed example:
         Dinner            Curry                  Stew     Pasta    Gnocchi
         Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
 
-    >>> xlmap = xl_link.write_frame(f, "t.xlsx")
+    >>> xlmap = f.to_excel("t.xlsx")
     >>> xlmap
         <XLMap: index: <XLRange: 'Sheet1'!A2:A5>, columns: <XLRange: 'Sheet1'!B1:F1>, data: <XLRange: 'Sheet1'!B2:F5>>
     >>> xlmap.index
@@ -51,16 +52,16 @@ Let's look at XLMap with a more detailed example:
     >>> xlmap.columns
         <XLRange: 'Sheet1'!B1:E1>
 
-Or as an alternative to using xl_link.write_frame, you can use xl_link XLDataFrame instead, which redefines to_excel, to return an XLMap:
+You can also use xl_link.write_frame, if you want to work with normal DataFrames (Though it just copies f, and turns it into an XLDataFrame!).
 
-    >>> from xl_link import XLDataFrame
-    >>> f = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
+    >>> from xl_link import write_frame
+    >>> pd_f = pd.DataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
                              index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                              data={'Mon': (15, 20, 12, 3),
                                    'Tues': (5, 16, 3, 0),
                                    'Weds': (3, 22, 2, 8),
                                    'Thur': (6, 7, 1, 9)})
-    >>> xlmap = f.to_excel("t.xlsx")
+    >>> xlmap = write_frame(pd_f, "t.xlsx")
     >>> xlmap
         <XLMap: index: <XLRange: 'Sheet1'!A2:A5>, columns: <XLRange: 'Sheet1'!B1:E1>, data: <XLRange: 'Sheet1'!B2:E5>>
 
@@ -178,5 +179,17 @@ Translate them, get items using a range of indexers, and even iterate over 1D XL
         I2
         J2
         K2
+
+Still in development is the XLMap.create_chart method, which aims to further simplify the process of making excel
+charts from DataFrames. Current working example (Currently only supports use of xlsxwriter for charts):
+
+
+    >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter') # Need to use xlsxwriter as engine (currently!)
+    >>> xlmap = f.to_excel(writer)
+    >>> chart = xlmap.create_chart('bar', 'Mon')
+    >>> writer.sheets['XLLinked'].insert_chart('A1', chart)
+    >>> writer.save()
+
+see XLMap.create_chart, and underlying chart_wrapper.py docstrings for more details.
 
 This package uses the utility functions from XlsxWriter under the BSD license found here: https://github.com/jmcnamara/XlsxWriter

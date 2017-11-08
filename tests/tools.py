@@ -1,5 +1,4 @@
 from pathlib import Path
-import time
 from openpyxl import load_workbook
 
 

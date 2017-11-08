@@ -54,10 +54,7 @@ Overly complex, confusing, hard to change
 
 ######################################################################################################################
 
-f = calories_per_meal
-
 chart = xlmap.create_chart('bar', 'Mon')
-
 writer.sheets['XLLinked'].insert_chart('A1', chart)
 
 writer.save()

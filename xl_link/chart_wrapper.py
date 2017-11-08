@@ -1,6 +1,5 @@
 from abc import abstractmethod
 import importlib
-import xlsxwriter
 from xl_link.xl_types import XLCell
 
 imported = []
