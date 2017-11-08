@@ -27,26 +27,36 @@ def get_xl_ranges(frame_index, frame_columns,
 
     Parameters
     ----------
-    frame_index: Pandas Index, or Array-like, used to determine location of index within spreadsheet.
-    frame_columns: Pandas Index or Array-like, used to determine location of column within spreadsheet.
-    excel_writer : string or ExcelWriter object
-    sheet_name : string, default ‘Sheet1’, Name of sheet which will contain DataFrame
-    columns : sequence, optional, Columns to write
-    header : boolean or list of string, default Truem Write out the column names. If a list of strings is given
-        it is assumed to be aliases for the column names
-    index : boolean, default True. Write row names (index)
-    index_label : string or sequence, default None. Column label for index column(s) if desired. If None is given,
-        and header and index are True, then the index names are used. A sequence should be given if the
+    frame_index: Pandas Index or Array-like
+        to determine location of index within spreadsheet.
+    frame_columns: Pandas Index or Array-like
+        used to determine location of column within spreadsheet.
+    excel_writer : string or ExcelWriter
+
+    sheet_name : str
+        default ‘Sheet1’, Name of sheet which will contain DataFrame
+    columns : sequence
+        optional, Columns to write
+    header : bool or list of strings,
+        default True Write out the column names. If a list of strings is given it is assumed to be aliases for the column names
+    index : bool
+        default True. Write row names (index)
+    index_label : str or sequence
+        default None. Column label for index column(s) if desired. If None is given, and header and index are True, then the index names are used. A sequence should be given if the
         DataFrame uses MultiIndex.
-    startrow : upper left cell row to dump data frame
-    startcol : upper left cell column to dump data frame
-    merge_cells : boolean, default True. Write MultiIndex and Hierarchical Rows as merged cells.
+    startrow : int
+        upper left cell row to dump data frame
+    startcol : int
+        upper left cell column to dump data frame
+    merge_cells : bool
+        default True. Write MultiIndex and Hierarchical Rows as merged cells.
 
     Returns
     -------
-    tuple: (data_range, index_range, col_rangem, empty_f) of type (XLRange, XLRange, XLRange, DataFrame),
-        where each range represents where the data, index and columns can be found on the spreadsheet, and empty_f is
-        an empty DataFrame with matching Indexes.
+    data_range, index_range, col_range : XLRange
+        Each range represents where the data, index and columns can be found on the spreadsheet
+    empty_f : DatFrame
+        an empty DataFrame with matching Indices.
     """
 
     empty_f = pd.DataFrame(index=frame_index, columns=frame_columns)
@@ -94,13 +104,17 @@ def write_frame(f, excel_writer, to_excel_args=None):
 
     Parameters
     ----------
-    f : Pandas DataFrame to write to Excel
-    excel_writer: Path or existing Excel Writer
-    to_excel_args: Additional arguments to pass to DataFrame.to_excel, see docs for DataFrame.to_excel
+    f : DataFrame
+        Frame to write to excel
+    excel_writer : str or ExcelWriter
+        Path or existing Excel Writer to use to write frame
+    to_excel_args : dict
+        Additional arguments to pass to DataFrame.to_excel, see docs for DataFrame.to_excel
 
     Returns
     -------
-    XLMap: Mapping that corresponds to the position in the spreadsheet that frame was written to.
+    XLMap :
+        Mapping that corresponds to the position in the spreadsheet that frame was written to.
     """
     xlf = XLDataFrame(f)
 
@@ -123,16 +137,20 @@ def _mapper_to_xl(value):
     raise TypeError("Could not conver {} to XLRange or XLCell".format(value))
 
 
-class SelectorProxy:
+class _SelectorProxy:
     """
     Proxy object that intercepts calls to Pandas DataFrame indexers, and re-interprets result into excel locations.
 
     Parameters
     ----------
-    mapper_frame: Pandas DataFrame with index the same as the DataFrame it is representing, however, each cell contains
+    mapper_frame: DataFrame
+        with index the same as the DataFrame it is representing, however, each cell contains
         the location they sit within the spreadsheet.
-    selector_name: str, name of the indexer SelectorProxy is emulating, i.e. loc, iloc, ix, iat or at
+    selector_name: str
+        name of the indexer SelectorProxy is emulating, i.e. loc, iloc, ix, iat or at
 
+    Notes
+    -----
     Only implements __getitem__ behaviour of indexers.
     """
 
@@ -156,8 +174,11 @@ class XLMap:
     The idea is should make using the data in spreadsheet easy to access, by using Pandas indexing syntax.
     For example can be used to create charts more easily (see example below).
 
-    Beware!
-    -------
+    Notes
+    -----
+
+    Recommended to not be created directly, instead via, XLDataFrame.to_excel.
+
     XLMap can only go 'one level deep' in terms of indexing, because each indexer always returns either an XLCell,
     or an XLRange. The only workaround is to reduce the size of your DataFrame BEFORE you call write_frame.
     This limitation drastically simplifies the implementation. Examples of what WON'T WORK:
@@ -170,36 +191,35 @@ class XLMap:
 
     Parameters
     ----------
-    data_range : XLRange that represents the region the DataFrame's data sits in.
-    index_range: XLRange that represents the region the DataFrame's index sits in.
-    column_range: XLRange that represents the region the DataFrame's columns sit in.
-    f: Pandas DataFrame that has been written to excel.
-
-    Recommended to not be created directly, instead via, xl_link.write_frame(f, excel_writer, **kwargs)
+    data_range, index_range, column_range : XLRange
+     that represents the region the DataFrame's data sits in.
+    f : DataFrame
+     that has been written to excel.
 
     Examples
     --------
-    calories_per_meal = pd.DataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
-                                 data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                                       'Mon': (15, 20, 12, 3),
-                                       'Tues': (5, 16, 3, 0),
-                                       'Weds': (3, 22, 2, 8),
-                                       'Thur': (6, 7, 1, 9)})
-    calories_per_meal.set_index("Meal", drop=True, inplace=True)
+    >>> calories_per_meal = XLDataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
+                                         data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+                                               'Mon': (15, 20, 12, 3),
+                                               'Tues': (5, 16, 3, 0),
+                                               'Weds': (3, 22, 2, 8),
+                                               'Thur': (6, 7, 1, 9)})
+    >>> calories_per_meal.set_index("Meal", drop=True, inplace=True)
 
-    # Write to excel
-    writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-    xlmap = write_frame(calories_per_meal, writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+    Write to excel
 
-    # Create chart with XLLink
-    workbook = writer.book
-    xl_linked_sheet = writer.sheets["XLLinked"]
-    xl_linked_chart = workbook.add_chart({'type': 'column'})
+    >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
+    >>> xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the XLMap
 
-    for time in calories_per_meal.index:
-        xl_linked_chart.add_series({'name': time,
-                      'categories': proxy.columns.frange,
-                      'values': proxy.loc[time].frange})
+    Create chart with XLLink
+
+    >>> workbook = writer.book
+    >>> xl_linked_sheet = writer.sheets["XLLinked"]
+    >>> xl_linked_chart = workbook.add_chart({'type': 'column'})
+    >>> for time in calories_per_meal.index:
+    >>>     xl_linked_chart.add_series({'name': time,
+                                        'categories': proxy.columns.frange,
+                                        'values': proxy.loc[time].frange})
     """
 
     def __init__(self, data_range, index_range, column_range, f, writer=None):
@@ -241,17 +261,18 @@ class XLMap:
 
         Parameters
         ----------
-        type_ : str Type of chart to create.
-        values : object, label or list of labels to corresponding to column to use as
-            values for each series in chart.
-        categories : object, label or list of labels to corresponding to column to use
-            as categories for each series in chart.
-        names : object, label or list of labels to corresponding to name of each series in chart.
-        subtype : str subtype of type, only available for some chart types e.g. bar, see Excel writing package
-            for details
-        title : str, chart title
-        x_axis_name : str, used as label on x_axis
-        y_axis_name : str, used as label on y_axis
+        type_ : str
+            Type of chart to create.
+        values, categories, names: str or list or tuple
+            label or list of labels to corresponding to column to use as values and categories and names for each series in chart.
+        subtype : str
+            subtype of type, only available for some chart types e.g. bar, see Excel writing package for details
+        title : str
+            chart title
+        x_axis_name : str
+            used as label on x_axis
+        y_axis_name : str
+            used as label on y_axis
 
         Returns
         -------
@@ -299,11 +320,13 @@ class XLMap:
 
         Parameters
         ----------
-        key : hashable or array-like of hashables, corresponding to the names of the columns desired.
+        key : hashable or array-like
+            hashables, corresponding to the names of the columns desired.
 
         Returns
         -------
-        XLRange corresponding to position of found colummn(s) within spreadsheet
+        XLRange :
+            corresponding to position of found colummn(s) within spreadsheet
 
         Example
         -------
@@ -323,14 +346,15 @@ class XLMap:
 
         Returns
         -------
-        XLCell or XLRange corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
+        XLCell or XLRange
+            corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
 
         Example
         -------
         >>> xlmap.loc['Tues']
             <XLRange: A2:D2>
         """
-        return SelectorProxy(self._mapper_frame, 'loc')
+        return _SelectorProxy(self._mapper_frame, 'loc')
 
     @property
     def iloc(self):
@@ -341,14 +365,15 @@ class XLMap:
 
         Returns
         -------
-        XLCell or XLRange corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
+        XLCell or XLRange
+            corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
 
         Example
         -------
         >>> xlmap.iloc[3, :]
             <XLRange: A2:D2>
         """
-        return SelectorProxy(self._mapper_frame, 'iloc')
+        return _SelectorProxy(self._mapper_frame, 'iloc')
 
     @property
     def ix(self):
@@ -359,7 +384,8 @@ class XLMap:
 
         Returns
         -------
-        XLCell or XLRange corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
+        XLCell or XLRange
+            corresponding to position of DataFrame, Series or Scalar found within spreadsheet.
 
 
         Example
@@ -367,7 +393,7 @@ class XLMap:
         >>> xlmap.ix[3, :]
             <XLRange A2:D2>
         """
-        return SelectorProxy(self._mapper_frame, 'ix')
+        return _SelectorProxy(self._mapper_frame, 'ix')
 
     @property
     def iat(self):
@@ -378,14 +404,15 @@ class XLMap:
 
         Returns
         -------
-        XLCell location corresponding to position value within spreadsheet.
+        XLCell
+            location corresponding to position value within spreadsheet.
 
         Example
         -------
         >>> xlmap.iat[3, 2]
             <XLCell C3>
         """
-        return SelectorProxy(self._mapper_frame, 'iat')
+        return _SelectorProxy(self._mapper_frame, 'iat')
 
     @property
     def at(self):
@@ -396,7 +423,8 @@ class XLMap:
 
         Returns
         -------
-        XLCell location corresponding to position value within spreadsheet.
+        XLCell
+            location corresponding to position value within spreadsheet.
 
 
         Example
@@ -404,48 +432,30 @@ class XLMap:
         >>> xlmap.at["Mon", "Lunch"]
             <XLCell: C3>
         """
-        return SelectorProxy(self._mapper_frame, 'at')
-
-
-to_excel_doc_start = """
-
-------------------------------------------------------------------------------------------------------------------------
-
-Monkeypatched by xl_link! Changes:
-
-Returns
--------
-        
-xl_link.XLMap corresponding to position of frame as it appears in excel (see XLMap for details)
-
-------------------------------------------------------------------------------------------------------------------------
-
-Pandas Docstring:
- 
-"""
+        return _SelectorProxy(self._mapper_frame, 'at')
 
 
 class XLDataFrame(pd.DataFrame):
     """
+    Monkeypatched DataFrame modified by xl_link!
 
-    ------------------------------------------------------------------------------------------------------------------------
+    Changes:
+    --------
 
-    Monkeypatched by xl_link! Changes:
+    * to_excel modified to return an XLMap.
 
-    to_excel modified to return an XLMap.
+    * XLDataFrame._constructor set to XLDataFrame -> stops reverting to normal DataFrame
 
-    XLDataFrame._constructor set to XLDataFrame -> stops reverting to normal DataFrame
+    Notes
+    -----
 
-    Note: Conversions from this DataFrame to Series or Panels will return regular Panels and Series,
+    Conversions from this DataFrame to Series or Panels will return regular Panels and Series,
     which will convert back into regular DataFrame's upon expanding/ reducing dimensions.
 
-    ------------------------------------------------------------------------------------------------------------------------
-
-    Pandas Docstring:
-
+    See Also
+    --------
+    Pandas.DataFrame
     """
-
-    __doc__ += pd.DataFrame.__doc__
 
     @property
     def _constructor(self):
@@ -456,6 +466,25 @@ class XLDataFrame(pd.DataFrame):
                  index_label=None, startrow=0, startcol=0, engine=None,
                  merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
                  freeze_panes=None):
+        """
+
+        Monkeypatched DataFrame.to_excel by xl_link!
+
+        Changes:
+        --------
+
+        Returns
+        -------
+
+        XLMap
+            corresponding to position of frame as it appears in excel (see XLMap for details)
+
+        See Also
+        --------
+
+        Pandas.DataFrame.to_excel for info on parameters
+
+        """
 
         if isinstance(excel_writer, pd.ExcelWriter):
             need_save = False
@@ -471,8 +500,6 @@ class XLDataFrame(pd.DataFrame):
 
         if need_save:
             excel_writer.save()
-
-        XLDataFrame.to_excel.__doc__ = to_excel_doc_start + super().to_excel.__doc__
 
         data_range, index_range, col_range, _ = get_xl_ranges(self.index, self.columns,
                                                               sheet_name=sheet_name,

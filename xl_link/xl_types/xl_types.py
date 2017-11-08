@@ -27,18 +27,12 @@ class XLCell:
 
     Parameters
     ----------
-    row : int corresponding to cell row number (0 indexed)
-    col : int corresponding to cell col number (0 indexed)
-    sheet: str corresponding to the sheet the cell is in, default='Sheet1'
-
-    Or using XLCell.from_cell
-
-    cell : str in excel notation (e.g. 'A1'), representing cell location.
-    sheet : sheet cell belongs to, default='Sheet1'
-
-    Or using XLCell.from_fcell
-
-    fcell: str in excel formula notation (e.g. "'Sheet1'!A1"), representing cell location.
+    row : int
+        corresponding to cell row number (0 indexed)
+    col : int
+        corresponding to cell col number (0 indexed)
+    sheet: str
+        corresponding to the sheet the cell is in, default='Sheet1'
 
     Examples
     --------
@@ -58,6 +52,11 @@ class XLCell:
     row, col and sheet are attributes that can be accessed and set directly.
 
     All methods are designed to return new objects, preserving the state of self.
+
+    See Also
+    --------
+    XLCell.from_cell
+    XLCell.from_fcell
     """
 
     def __init__(self, row, col, sheet='Sheet1'):
@@ -67,10 +66,38 @@ class XLCell:
 
     @classmethod
     def from_cell(cls, cell, sheet="Sheet1"):
+        """
+        Alternative constructor
+
+        Paramters
+        ---------
+        cell : str
+            cell in excel notation (e.g. 'A1'), representing cell location.
+        sheet : sheet
+            sheet cell belongs to, default='Sheet1'
+
+        Returns
+        -------
+        XLCell
+            Initialised XLCell
+        """
         return cls(*xl_cell_to_rowcol(cell), sheet)
 
     @classmethod
     def from_fcell(cls, fcell):
+        """
+        Alternative constructor
+
+        Paramters
+        ---------
+        fcell: str
+            cell in excel formula notation (e.g. "'Sheet1'!A1"), representing cell location.
+
+        Returns
+        -------
+        XLCell
+            Initialised XLCell
+        """
         try:
             sheet, cell = fcell.split('!')
         except ValueError:
@@ -84,7 +111,8 @@ class XLCell:
 
         Returns
         -------
-        str : cell location in excel notation
+        str
+            cell location in excel notation
 
         Examples
         --------
@@ -101,7 +129,8 @@ class XLCell:
 
         Returns
         -------
-        str : cell location in excel notation, in '{sheet}'!{cell} form
+        str
+            cell location in excel notation, in '{sheet}'!{cell} form
 
         Examples
         --------
@@ -118,7 +147,8 @@ class XLCell:
 
         Returns
         -------
-        (row, col) corresponding to location of cell
+        row, col : tuple(int, int)
+            (row, col) corresponding to location of cell
         """
         return self.row, self.col
 
@@ -128,11 +158,13 @@ class XLCell:
 
         Parameters
         ----------
-        other : XLCell, that makes up stop of excel range
+        other : XLCell
+            other XLCell that makes up stop of excel range
 
         Returns
         -------
-        XLRange between this cell and other
+        XLRange
+            range between this cell and other
 
         Example
         -------
@@ -156,7 +188,8 @@ class XLCell:
 
         Parameters
         ----------
-        other : object to compare for equality.
+        other : object
+            to compare for equality.
 
         Notes
         -----
@@ -180,7 +213,8 @@ class XLCell:
         """
         Returns
         -------
-        copy of self
+        XLCell
+            copy of self
         """
         return XLCell(self.row, self.col, self.sheet)
 
@@ -190,12 +224,15 @@ class XLCell:
 
         Parameters
         ----------
-        row : int corresponding to movement in row direction (+ve down the spreadsheet)
-        col : int corresponding to movement in col direction (+ve right across the spreadsheet)
+        row : int
+            corresponding to movement in row direction (+ve down the spreadsheet)
+        col : int
+            corresponding to movement in col direction (+ve right across the spreadsheet)
 
         Returns
         -------
-        new XLCell with translation applied
+        XLCell
+         new cell with translation applied
         """
         cell = self.copy()
         cell.row += row or 0
@@ -211,32 +248,18 @@ class XLRange:
 
     Parameters
     ----------
-    start : XLCell corresponding to start cell
-    stop : XLCell corresponding to stop cell
-
-    Or using XLRange.from_range
-
-    range : str in excel notation (e.g. 'A1:B20'), representing excel range.
-    sheet : sheet range belongs to, default='Sheet1'
-
-    Or using XLRange.from_frange
-
-    frange : str in excel formula notation (e.g. "'Sheet1'!A1:B20"), representing excel range.
+    start : XLCell
+        corresponding to start cell
+    stop : XLCell
+        corresponding to stop cell
 
     Examples
     --------
     Using __init__
+
     >>> start = XLCell.from_cell('A1')
     >>> stop = XLCell.from_cell('B7')
     >>> XLRange(start, stop)
-        <XLRange: A1:B7>
-
-    Using from_range
-    >>> XLRange.from_range('A1:B7')
-        <XLRange: A1:B7>
-
-    Using from_frange
-    >>> XLRange.from_frange("'Accounts'!A1:B7")
         <XLRange: A1:B7>
 
     Notes
@@ -246,6 +269,11 @@ class XLRange:
     start and stop are attributes that can be accessed and modified directly.
 
     All methods are designed to return new objects, preserving the state of self.
+
+    See Also
+    --------
+    XLRange.from_range
+    XLRange.from_frange
     """
     def __init__(self, start, stop):
         assert start.sheet == stop.sheet, "start and stop must be in the same sheet"
@@ -255,11 +283,40 @@ class XLRange:
 
     @classmethod
     def from_range(cls, range, sheet='Sheet1'):
+        """
+        Alternative constructor
+
+        Parameters
+        ----------
+
+        range : str
+            str in excel notation (e.g. 'A1:B20'), representing excel range.
+        sheet : str
+            sheet range belongs to, default='Sheet1'
+
+        Returns
+        -------
+        XLRange
+            initialised XLRange
+        """
         start, stop = range.split(':')
         return cls(XLCell.from_cell(start, sheet), XLCell.from_cell(stop, sheet))
 
     @classmethod
     def from_frange(cls, frange):
+        """
+        Alternative constructor
+
+        Parameters
+        ----------
+        frange : str
+            str in excel formula notation (e.g. "'Sheet1'!A1:B20"), representing excel range.
+
+        Returns
+        -------
+        XLRange
+            initialised XLRange
+        """
         sheet, range = frange.split('!')
         return cls.from_range(range, sheet)
 
@@ -270,7 +327,8 @@ class XLRange:
 
         Returns
         -------
-        str representing this range in excel notation
+        str
+            representing this range in excel notation
 
         Examples
         --------
@@ -289,7 +347,8 @@ class XLRange:
 
         Returns
         -------
-        str representing this range in excel notation for use in excel formulas (e.g. "'{sheet}'!{start}:{stop}"
+        str
+            representing this range in excel notation for use in excel formulas (e.g. "'{sheet}'!{start}:{stop}"
 
         Examples
         --------
@@ -308,7 +367,10 @@ class XLRange:
 
         Returns
         -------
-        tuple in form ((start.row, start.col), (stop.row, stop.col))
+        start.row, stop.col : tuple
+            start position in rows and column num (start.row, start.col)
+        stop.row, stop.col : tuple
+            stop position in rows and column num (stop.row, stop.col)
         """
         return self.start.rowcol, self.stop.rowcol
 
@@ -317,7 +379,8 @@ class XLRange:
         """
         Returns
         -------
-        tuple representing shape of XLRange in form (height, width)
+        tuple
+            representing shape of XLRange in form (height, width)
         """
         return self.stop.row - self.start.row + 1, self.stop.col - self.start.col + 1
 
@@ -374,11 +437,12 @@ class XLRange:
 
         Parameters
         ----------
-        key : int, slice, boolian indexer, or tuple of 2 ints/ slices!
+        key : int or slice or boolian indexer or tuple of 2 ints/ slices!
 
         Returns
         -------
-        XLCell or XLRange after selection using key applied. Designed to emulate behaviour of Pandas Indexes.
+        XLCell or XLRange
+            result after selection using key applied. Designed to emulate behaviour of Pandas Indexes.
 
         Notes
         -----
@@ -459,9 +523,11 @@ class XLRange:
     def iterrows(self):
         """
         Iterate over each row of self, yields each row as XLRange
+
         Yields
         -------
-        XLRange corresponding to current row
+        XLRange
+            corresponding to current row
         """
         if not self.is_2D:
             raise TypeError("Can only call iterrows on 2D ranges")
@@ -484,12 +550,15 @@ class XLRange:
 
         Parameters
         ----------
-        row : int corresponding to movement in row direction (+ve down the spreadsheet)
-        col : int corresponding to movement in col direction (+ve right across the spreadsheet)
+        row : int
+            corresponding to movement in row direction (+ve down the spreadsheet)
+        col : int
+            corresponding to movement in col direction (+ve right across the spreadsheet)
 
         Returns
         -------
-        new XLRange with translation applied
+        XLRange
+            new with translation applied
 
         Notes
         -----

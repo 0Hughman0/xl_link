@@ -31,10 +31,14 @@ class AbstractChartWrapper:
 
         Parameters
         ----------
-        book : object, pd.ExcelWriter.book object typical represents whole excel file, and needed to creat new chart
-        type_ : str, type of chart desired
-        subtype : str, subtype of chart desired
-        engine : package corresponding to engine used (usefull for fetching objects from that package)
+        book : object
+            pd.ExcelWriter.book object typical represents whole excel file, and needed to creat new chart
+        type_ : str
+            type of chart desired
+        subtype : str
+            subtype of chart desired
+        engine : package
+            corresponding to engine used (usefull for fetching objects from that package)
         """
         self.type_ = type_
         self.book = book
@@ -49,9 +53,12 @@ class AbstractChartWrapper:
 
         Parameters
         ----------
-        name : str representing the name of the series
-        values : XLRange represending values of series
-        categories : XLRange representing values of categories
+        name : str
+            representing the name of the series
+        values : XLRange
+            represending values of series
+        categories : XLRange
+            representing values of categories
         """
         pass
 
@@ -186,18 +193,25 @@ def create_chart(workbook, engine, type_, values, categories, names, subtype=Non
 
     Parameters
     ----------
-    workbook : workbook to insert chart into, either XlsxWriter.Workbooks or openpyxl Workbooks.
-    engine : str representing engine to use, either XlsxWriter.Workbooks or openpyxl Workbooks.
-    type_ : str representing chart type, see engine docs for options e.g. 'line'.
-    values : XLRange or sequence of XLRanges to use as values for each series/ data set (Excel equivalent to y data).
-    categories : XLRange or sequence of XLRanges, or str/ sequence of strings to use as categories for
-        each series/ data set (Excel equivalent to x data).
-    names : str/ sequence of strings to use as name for each series/ data set (Excel uses this to label each dataset).
-    subtype : str representing chart subtype, see engine docs for details.
+    workbook : object
+        to insert chart into, either XlsxWriter.Workbooks or openpyxl Workbooks.
+    engine : str
+        representing engine to use, either XlsxWriter.Workbooks or openpyxl Workbooks.
+    type_ : str
+        representing chart type, see engine docs for options e.g. 'line'.
+    values : XLRange or sequence of XLRanges
+        use as values for each series/ data set (Excel equivalent to y data).
+    categories : XLRange or sequence of XLRanges
+        use as categories for each series/ data set (Excel equivalent to x data).
+    names : str/ sequence of str
+        use as name for each series/ data set (Excel uses this to label each dataset).
+    subtype : str
+        representing chart subtype, see engine docs for details.
 
     Returns
     -------
-    chart object, corresponding to engine's chart type.
+    chart : object
+        populated chart object corresponding to engine's chart type.
     """
     if 'openpyxl' in engine:
         engine = 'openpyxl' # Cuz pandas appends version to engine name
