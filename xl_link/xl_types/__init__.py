@@ -1,1 +1,1 @@
-from .xl_types import XLCell, XLRange
+from .xl_types import XLCell, XLRange, to_series

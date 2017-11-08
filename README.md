@@ -1,30 +1,67 @@
 # XLLink for Pandas
 
-Love the fancy pandas indexing and slicing, but frustrated when writing to Excel, and loosing all that functionality?
+Love the functionality of Pandas, but find yourself disappointed that as soon as your DataFrame is written to excel, you loose it all?
 
-Fear not! XLLink solves this by returning an XLMap object upon use of to_excel
+Fear not! XLLink solves this by returning the powerfull XLMap object upon use of to_excel!
 
 This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and iat (*ahem and ix... booooo!), but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
 
+But crucially also **supports creating xlsxwriter and openpyxl charts.**.
+
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
-    xlmap = f.to_excel("t.xlsx")
+    >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
+    >>> f1 = XLDataFrame(columns=('X', 'Y1', 'Y2'),
+                         data={'X': range(10),
+                               'Y1': list(random.randrange(0, 10) for _ in range(10)),
+                               'Y2': list(random.randrange(0, 10) for _ in range(10))})
+    >>> f1.set_index('X', inplace=True)
+    >>>
+    >>> xlmap1 = f1.to_excel(writer, sheet_name='scatter')
+    >>> scatter_chart = xlmap1.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
+    >>> xlmap1.sheet.insert_chart(xlmap1.columns[-1].translate(0, 1).cell, scatter_chart) # Puts at top of first empty col
+    >>> writer.save()
 
-    for time in xlmap.f.index:
-        xl_linked_chart.add_series({
-                            'name': time,
-                            'categories': xlmap.columns.frange,
-                            'values': xlmap.loc[time].frange})
+Which produces exactly the chart you would expect.
 
-Compared to:
+Here is a direct comparison between with xl_link and without:
 
-    for col_num in range(1, len(f.index) + 1):
-        without_chart.add_series({
-            'name':       ["Without", col_num, 0],
-            'categories': ["Without", 0, 1, 0, 4],
-            'values':     ["Without", col_num, 1, col_num, 4]})
+    Setup
 
-Hopefully you agree that the former is far more appealing.
+    >>> writer = pd.ExcelWriter("Comparison.xlsx", engine='xlsxwriter')
+    >>> calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
+                                       index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+                                       data={'Mon': (15, 20, 12, 3),
+                                             'Tues': (5, 16, 3, 0),
+                                             'Weds': (3, 22, 2, 8),
+                                             'Thur': (6, 7, 1, 9)})
+
+    Create chart with xl_link
+
+    >>> xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked")
+    >>> xl_linked_chart = xlmap.create_chart('column', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories")
+    >>> right_of_table = xlmap.columns[-1].translate(0, 1).cell
+    >>> xlmap.sheet.insert_chart(right_of_table, xl_linked_chart)
+
+    Same chart without xl_link
+
+    >>> calories_per_meal.to_excel(writer, sheet_name="Without")
+    >>> without_sheet = writer.sheets["Without"]
+    >>> without_chart = writer.book.add_chart({"type": "column"})
+    >>> for col_num in range(1, len(calories_per_meal.index) + 1):
+    >>>     without_chart.add_series({'name': ["Without", col_num, 0],
+    >>>                               'categories': ["Without", 0, 1, 0, 4],
+    >>>                               'values': ["Without", col_num, 1, col_num, 4]})
+    >>> without_chart.set_x_axis({'name': 'Meal'})
+    >>> without_chart.set_y_axis({'name': 'Calories'})
+    >>> without_chart.title = "Without xl_link"
+    >>> row, col = (1, col_num + 0) # Maybe this is nicer!
+    >>> without_sheet.insert_chart(row, col, without_chart)
+    >>> writer.save()
+
+With xl_link's sensible defaults, it's easy to create complex charts.
+
+xl_link passes the chart type, and subtype straight to the excel engine, so if it's in the engine's docs, it should work!
 
 This mysterious xlmap is an XLMap object, that represents the DataFrame f, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.
 xl_link provides the class XLDataFrame, which subtly modifies to behaviour to to_excel to return and XLMap object
@@ -179,17 +216,5 @@ Translate them, get items using a range of indexers, and even iterate over 1D XL
         I2
         J2
         K2
-
-Still in development is the XLMap.create_chart method, which aims to further simplify the process of making excel
-charts from DataFrames. Current working example (Currently only supports use of xlsxwriter for charts):
-
-
-    >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter') # Need to use xlsxwriter as engine (currently!)
-    >>> xlmap = f.to_excel(writer)
-    >>> chart = xlmap.create_chart('bar', 'Mon')
-    >>> writer.sheets['XLLinked'].insert_chart('A1', chart)
-    >>> writer.save()
-
-see XLMap.create_chart, and underlying chart_wrapper.py docstrings for more details.
 
 This package uses the utility functions from XlsxWriter under the BSD license found here: https://github.com/jmcnamara/XlsxWriter

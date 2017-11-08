@@ -5,18 +5,20 @@ from openpyxl import load_workbook
 TEST_CASE_FOLDER = Path("./tests/test_cases")
 
 
-def path_for(filename):
-    return (TEST_CASE_FOLDER / (filename + ".xlsx")).absolute().as_posix()
-
+def path_for(*args):
+    *path, file = args
+    file += '.xlsx'
+    return Path(TEST_CASE_FOLDER , *path, file).absolute().as_posix()
 
 class XLMapBaseCase:
 
+    subdir = 'indexers'
     test_frame = None
     to_excel_args = {}
 
     def setUp(self):
         self.f = self.test_frame
-        filename = path_for(self.__class__.__name__)
+        filename = path_for(self.subdir, self.__class__.__name__)
         self.xlmap = self.f.to_excel(filename, **self.to_excel_args)
         self.sheet = load_workbook(filename)[self.to_excel_args.get('sheet_name', 'Sheet1')]
 

@@ -1,6 +1,6 @@
 from unittest import defaultTestLoader, TestSuite
 
-from . import xlmap, xl_types, indexers
+from . import xlmap, xl_types, indexers, charts
 
 
 def load_tests(loader, standard_tests, pattern):
@@ -11,4 +11,5 @@ def load_tests(loader, standard_tests, pattern):
     suite.addTests(frame_proxy_tests)
     suite.addTests(xl_types_tests)
     suite.addTest(indexer_tests)
+    suite.addTest(charts.suite)
     return suite

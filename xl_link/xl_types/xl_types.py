@@ -17,6 +17,9 @@ def fill_slice(holey_slice):
                  holey_slice.stop if holey_slice.stop is not None else -1,
                  holey_slice.step if holey_slice.step is not None else 1)
 
+def to_series(cell_or_range):
+    return '=' + cell_or_range
+
 
 class XLCell:
     """

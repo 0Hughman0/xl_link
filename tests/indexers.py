@@ -11,13 +11,13 @@ from pathlib import Path
 
 from xl_link import XLDataFrame
 
-from .tools import XLMapBaseCase
+from .tools import XLMapBaseCase, path_for
 
 TEST_CASE_FOLDER = Path("./tests/test_cases")
 
 
 def path_for(filename):
-    return (TEST_CASE_FOLDER / filename).absolute().as_posix()
+    return (TEST_CASE_FOLDER / 'indexers' / (filename + '.xlsx')).absolute().as_posix()
 
 test_frame = XLDataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
                           data={'Meal': ('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),

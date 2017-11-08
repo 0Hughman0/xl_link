@@ -8,7 +8,7 @@ except ImportError:
 from pandas.io.common import _stringify_path
 
 from .xl_types import XLCell
-from .chart_wrapper import create_chart
+from .chart_wrapper import create_chart, SINGLE_CATEGORY_CHARTS, CATEGORIES_REQUIRED_CHARTS
 
 
 def get_xl_ranges(frame_index, frame_columns,
@@ -208,7 +208,10 @@ class XLMap:
 
         self.data = data_range
         self._f = f.copy()
+
         self.writer = writer
+        self.book = writer.book
+        self.sheet = writer.sheets[self.index.sheet]
 
         self._mapper_frame = f.copy().astype(XLCell)
 
@@ -229,7 +232,10 @@ class XLMap:
     def __repr__(self):
         return "<XLMap: index: {}, columns: {}, data: {}>".format(self.index, self.columns, self.data)
 
-    def create_chart(self, type_, values=None, categories=None, names=None, subtype=None, writer=None):
+    def create_chart(self, type_='scatter',
+                     values=None, categories=None, names=None,
+                     subtype=None,
+                     title=None, x_axis_name=None, y_axis_name=None):
         """
         Create excel chart object based off of data within the Frame.
 
@@ -241,7 +247,11 @@ class XLMap:
         categories : object, label or list of labels to corresponding to column to use
             as categories for each series in chart.
         names : object, label or list of labels to corresponding to name of each series in chart.
-        engine : str one of xlsxwriter... corresponding used to determine what chart object to make.
+        subtype : str subtype of type, only available for some chart types e.g. bar, see Excel writing package
+            for details
+        title : str, chart title
+        x_axis_name : str, used as label on x_axis
+        y_axis_name : str, used as label on y_axis
 
         Returns
         -------
@@ -249,32 +259,37 @@ class XLMap:
         Chart object corresponding to the engine selected
 
         """
-        if writer is None:
-            writer = self.writer
 
-        if names is None:
-            names = tuple(cell for cell in self.index)
+        if names is None and categories is None:
+            names = tuple(name for name in self.f.columns.values)
+        elif names is None and isinstance(categories, (str, int, list, tuple)):
+            names = categories
+        elif isinstance(names, (list, tuple)):
+            names = tuple(self.f[names].columns.values)
         else:
-            if isinstance(names, str):
-                names = tuple(cell for cell in self[names])
-
-        if categories is None:
-            categories = self.columns
-        else:
-            if isinstance(categories, list) or isinstance(categories, tuple):
-                categories = list(self[category] for category in categories)
-            else:
-                categories = self[categories]
+            raise TypeError("Couldn't understand names input: " + names)
 
         if values is None:
-            values = tuple(self[label] for label in self.f.columns)
+            values = tuple(self[value] for value in self.f.columns)
+        elif isinstance(values, list) or isinstance(values, tuple):
+            values = tuple(self[value] for value in values)
         else:
-            if isinstance(values, list) or isinstance(values, tuple):
-                values = list(self[value] for value in values)
-            else:
-                values = self[values]
+            values = self[values]
 
-        return create_chart(writer.book, 'xlsxwriter', type_, values, categories, names, subtype)
+        if categories is None and (type_ in SINGLE_CATEGORY_CHARTS and isinstance(values, tuple)) or \
+                        type_ in CATEGORIES_REQUIRED_CHARTS:
+            categories = self.index # Default, use x as index
+        elif categories is None:
+            pass
+        elif isinstance(categories, (list, tuple)):
+            categories = list(self[category] for category in categories)
+        else:
+            categories = self[categories]
+
+        return create_chart(self.book, self.writer.engine, type_,
+                            values, categories, names,
+                            subtype, title,
+                            x_axis_name, y_axis_name)
 
     def __getitem__(self, key):
         """

@@ -1,8 +1,8 @@
 import pandas as pd
 from xl_link import XLDataFrame
+import random
 
 
-# Create EmbeddedFrame
 calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
                                  index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                                  data={'Mon': (15, 20, 12, 3),
@@ -10,51 +10,38 @@ calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
                                        'Weds': (3, 22, 2, 8),
                                        'Thur': (6, 7, 1, 9)})
 
-# Write to excel
-writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+#### Using openpyxl #####################################################################################################
 
-# Create chart with XLLink ############################################################################################
+writer = pd.ExcelWriter("OpenPyXLExample.xlsx", engine="openpyxl")
+xlmap = calories_per_meal.to_excel(writer, sheet_name='with openpyxl')
 
-workbook = writer.book
-xl_linked_sheet = writer.sheets["XLLinked"]
-xl_linked_chart = workbook.add_chart({'type': 'column'})
+chart = xlmap.create_chart('bar', ['Mon', 'Tues'], title="Bar Chart", x_axis_name="Meal", y_axis_name="Calories")
 
-for time in calories_per_meal.index:
-    xl_linked_chart.add_series({'name': time,
-                      'categories': xlmap.columns.frange,
-                      'values': xlmap.loc[time].frange})
+xlmap.sheet.add_chart(chart, "A1")
+xlmap.writer.save()
 
-right_of_table = xlmap.columns[-1].translate(0, 1)
-xl_linked_sheet.insert_chart(right_of_table.cell, xl_linked_chart)
+#### Using xlsxwriter ##################################################################################################
 
-"""
-Easy to read, and modify, intuitive
-"""
-######################################################################################################################
+### Bar Charts #########################################################################################################
 
-# Create chart without XLLink :( #####################################################################################
+writer = pd.ExcelWriter("XlsxWriterExample.xlsx", engine='xlsxwriter')
 
-calories_per_meal.to_excel(writer, sheet_name="Without")
+f1 = XLDataFrame(columns=('X', 'Y1', 'Y2'),
+                 data={'X': range(10),
+                       'Y1': list(random.randrange(0, 10) for _ in range(10)),
+                       'Y2': list(random.randrange(0, 10) for _ in range(10))})
+f1.set_index('X', inplace=True)
 
-without_sheet = writer.sheets["Without"]
-without_chart = workbook.add_chart({"type": "column"})
+xlmap2 = calories_per_meal.to_excel(writer, sheet_name="XLLinked") # returns the 'ProxyFrame'
+xl_linked_chart = xlmap2.create_chart('column', title="Bar Chart", x_axis_name="Meal", y_axis_name="Calories")
 
-for col_num in range(1, len(calories_per_meal.index) + 1):
-    without_chart.add_series({
-        'name':       ["Without", col_num, 0],
-        'categories': ["Without", 0, 1, 0, 4],
-        'values':     ["Without", col_num, 1, col_num, 4]})
+right_of_table = xlmap2.columns[-1].translate(0, 1).cell
+xlmap2.sheet.insert_chart(right_of_table, xl_linked_chart)
 
-without_sheet.insert_chart(right_of_table.cell, without_chart)
+### Simple Scatter #####################################################################################################
 
-"""
-Overly complex, confusing, hard to change
-"""
-
-######################################################################################################################
-
-chart = xlmap.create_chart('bar', 'Mon')
-writer.sheets['XLLinked'].insert_chart('A1', chart)
+xlmap1 = f1.to_excel(writer, sheet_name='scatter')
+scatter_chart = xlmap1.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
+xlmap1.sheet.insert_chart(xlmap1.columns[-1].translate(0, 1).cell, scatter_chart)
 
 writer.save()
