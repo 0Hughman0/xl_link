@@ -1,12 +1,14 @@
 # XLLink for Pandas
 
+**API docs: https://0hughman0.github.io/xl_link/api.html**
+
 Love the functionality of Pandas, but find yourself disappointed that as soon as your DataFrame is written to excel, you loose it all?
 
 Fear not! XLLink solves this by returning the powerfull XLMap object upon use of to_excel!
 
 This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and iat (*ahem and ix... booooo!), but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
 
-But crucially also **supports creating xlsxwriter and openpyxl charts.**.
+But crucially also **supports creating xlsxwriter and openpyxl charts.**
 
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
