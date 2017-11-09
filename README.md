@@ -2,6 +2,8 @@
 
 **API docs: https://0hughman0.github.io/xl_link/api.html**
 
+**Installation `pip install xl_link`**
+
 Love the functionality of Pandas, but find yourself disappointed that as soon as your DataFrame is written to excel, you loose it all?
 
 Fear not! XLLink solves this by returning the powerfull XLMap object upon use of to_excel!
