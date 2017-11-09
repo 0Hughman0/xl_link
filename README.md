@@ -2,15 +2,17 @@
 
 **API docs: https://0hughman0.github.io/xl_link/api.html**
 
-**Installation `pip install xl_link`**
+**Installation: `pip install xl_link`**
 
 Love the functionality of Pandas, but find yourself disappointed that as soon as your DataFrame is written to excel, you loose it all?
 
 Fear not! XLLink solves this by returning the powerfull XLMap object upon use of to_excel!
 
-This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and iat (*ahem and ix... booooo!), but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
+This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and iat, but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
 
-But crucially also **supports creating xlsxwriter and openpyxl charts.**
+Perhaps more usefully, xlmaps offer a wrapper around excel engines (currently supporting xlsxwriter and openpyxl) to make creating charts in excel far more intuitive.
+
+## Chart capabilities
 
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
@@ -26,9 +28,15 @@ Here's a teaser of what xl_link can do when combined with xlsx writer (for examp
     >>> xlmap1.sheet.insert_chart(xlmap1.columns[-1].translate(0, 1).cell, scatter_chart) # Puts at top of first empty col
     >>> writer.save()
 
-Which produces exactly the chart you would expect.
+Which produces this chart:
 
-Here is a direct comparison between with xl_link and without:
+![scatter chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/ScatterExample.png)
+
+Creating a complex chart like this:
+
+![multi bar chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/BarExample.png)
+
+is as easy as:
 
     Setup
 
@@ -44,10 +52,10 @@ Here is a direct comparison between with xl_link and without:
 
     >>> xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked")
     >>> xl_linked_chart = xlmap.create_chart('column', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories")
-    >>> right_of_table = xlmap.columns[-1].translate(0, 1).cell
-    >>> xlmap.sheet.insert_chart(right_of_table, xl_linked_chart)
+    >>> xlmap.sheet.insert_chart('A1', xl_linked_chart)
+    >>> xlmap.writer.save()
 
-    Same chart without xl_link
+Creating the same chart without xl_link looks something like:
 
     >>> calories_per_meal.to_excel(writer, sheet_name="Without")
     >>> without_sheet = writer.sheets["Without"]
@@ -59,16 +67,16 @@ Here is a direct comparison between with xl_link and without:
     >>> without_chart.set_x_axis({'name': 'Meal'})
     >>> without_chart.set_y_axis({'name': 'Calories'})
     >>> without_chart.title = "Without xl_link"
-    >>> row, col = (1, col_num + 0) # Maybe this is nicer!
-    >>> without_sheet.insert_chart(row, col, without_chart)
+    >>> without_sheet.insert_chart('A1', without_chart)
     >>> writer.save()
 
 With xl_link's sensible defaults, it's easy to create complex charts.
 
 xl_link passes the chart type, and subtype straight to the excel engine, so if it's in the engine's docs, it should work!
 
-This mysterious xlmap is an XLMap object, that represents the DataFrame f, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.
-xl_link provides the class XLDataFrame, which subtly modifies to behaviour to to_excel to return and XLMap object
+### Indexing capabilities
+
+An XLMap object represents a DataFrame, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.
 
 Let's look at XLMap with a more detailed example:
 
@@ -92,20 +100,6 @@ Let's look at XLMap with a more detailed example:
         <XLRange: 'Sheet1'!A2:A5>
     >>> xlmap.columns
         <XLRange: 'Sheet1'!B1:E1>
-
-You can also use xl_link.write_frame, if you want to work with normal DataFrames (Though it just copies f, and turns it into an XLDataFrame!).
-
-    >>> from xl_link import write_frame
-    >>> pd_f = pd.DataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
-                             index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                             data={'Mon': (15, 20, 12, 3),
-                                   'Tues': (5, 16, 3, 0),
-                                   'Weds': (3, 22, 2, 8),
-                                   'Thur': (6, 7, 1, 9)})
-    >>> xlmap = write_frame(pd_f, "t.xlsx")
-    >>> xlmap
-        <XLMap: index: <XLRange: 'Sheet1'!A2:A5>, columns: <XLRange: 'Sheet1'!B1:E1>, data: <XLRange: 'Sheet1'!B2:E5>>
-
 
 If you were to open t.xlsx you would find that the ranges described by xlmap line up perfectly with where f was written. And, write_frame is smart, you can use all of the parameters you normally use with DataFrame.to_excel, just pass them as a dict to write_frame:
 
@@ -155,17 +149,11 @@ For convenience, you can access a copy of the frame f, in it's state as it was w
         Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
 
 
-Note that as a limitation, the xlmap.index and xlmap.columns are simply XLRange objects, so you cannot apply Pandas Index methods to get ranges within them.
+## XLRange and XLCell
 
-That said, XLRanges support integer, slice and boolean indexing (For more details see below/ doc-strings), so there are workarounds:
+These are the objects used within xl_link to represent ranges and cells within excel.
 
-    >>> xlmap.index["Lunch":"Dinner"]
-        TypeError: Expecting tuple of slices, boolean indexer, or an index or a slice if 1D, not Lunch
-    >>> xlmap.index[xlmap.f.index.get_loc('Lunch'):xlmap.f.index.get_loc('Dinner')] # probably more elegant workarounds possible!
-        <XLRange: 'Demo Sheet'!A10:A11>
-
-
-The XLCell and XLRange objects used to store the location of parts of f are powerful in themselves, if needs be, you can create them yourself:
+These objects have a ton of methods, making them powerful in themselves, if needs be, you can create them yourself:
 
     >>> from xl_link.xl_types import XLRange, XLCell
     >>> start = XLCell(1, 1) # using row, col
