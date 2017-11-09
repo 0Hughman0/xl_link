@@ -30,7 +30,7 @@ Here's a teaser of what xl_link can do when combined with xlsx writer (for examp
 
 Which produces this chart:
 
-![scatter chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/ScatterExample.png)
+![scatter chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/ScatterExample.PNG)
 
 Creating a complex chart like this:
 
