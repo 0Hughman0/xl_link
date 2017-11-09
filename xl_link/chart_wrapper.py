@@ -234,7 +234,7 @@ def create_chart(workbook, engine, type_, values, categories, names, subtype=Non
 
     if engine not in imported:
         engine_mod = importlib.import_module(engine)
-        check_compatible(engine_mod)
+        check_engine_compatible(engine_mod)
         imported[engine] = engine_mod
 
     if engine == 'xlsxwriter':
