@@ -61,7 +61,7 @@ which will convert back into regular DataFrame’s upon expanding/ reducing dime
 </div>
 <dl class="method">
 <dt id="xl_link.XLDataFrame.to_excel">
-<code class="descname">to_excel</code><span class="sig-paren">(</span><em>excel_writer</em>, <em>sheet_name='Sheet1'</em>, <em>na_rep=''</em>, <em>float_format=None</em>, <em>columns=None</em>, <em>header=True</em>, <em>index=True</em>, <em>index_label=None</em>, <em>startrow=0</em>, <em>startcol=0</em>, <em>engine=None</em>, <em>merge_cells=True</em>, <em>encoding=None</em>, <em>inf_rep='inf'</em>, <em>verbose=True</em>, <em>freeze_panes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLDataFrame.to_excel" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_excel</code><span class="sig-paren">(</span><em>excel_writer</em>, <em>sheet_name='Sheet1'</em>, <em>na_rep=''</em>, <em>float_format=None</em>, <em>columns=None</em>, <em>header=True</em>, <em>index=True</em>, <em>index_label=None</em>, <em>startrow=0</em>, <em>startcol=0</em>, <em>engine=None</em>, <em>merge_cells=True</em>, <em>encoding=None</em>, <em>inf_rep='inf'</em>, <em>verbose=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLDataFrame.to_excel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Monkeypatched DataFrame.to_excel by xl_link!</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -76,6 +76,12 @@ which will convert back into regular DataFrame’s upon expanding/ reducing dime
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><code class="xref py py-meth docutils literal"><span class="pre">Pandas.DataFrame.to_excel()</span></code></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When providing a path as excel_writer, default engine used is ‘xlsxwriter’, as xlsxwriter workbooks can only be
+saved once, xl_link suppresses calling <cite>excel_writer.save()</cite>, as a result, <cite>xlmap.writer.save()</cite> should be
+called once no further changes are to be made to the spreadsheet.</p>
 </div>
 </dd></dl>
 
@@ -171,7 +177,12 @@ This limitation drastically simplifies the implementation. Examples of what WON�
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>type</strong> (<em>str</em>) – Type of chart to create.</li>
-<li><strong>categories</strong><strong>, </strong><strong>names</strong> (<em>values</em><em>,</em>) – label or list of labels to corresponding to column to use as values and categories and names for each series in chart.</li>
+<li><strong>values</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – label or list of labels to corresponding to column to use as values for each series in chart.
+Default all columns.</li>
+<li><strong>categories</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – label or list of labels to corresponding to column to use as categories for each series in chart.
+Default, use index for ‘scatter’ or None for everything else.</li>
+<li><strong>names</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – str or list of strs to corresponding to names for each series in chart.
+Default, column names corresponding to values.</li>
 <li><strong>subtype</strong> (<em>str</em>) – subtype of type, only available for some chart types e.g. bar, see Excel writing package for details</li>
 <li><strong>title</strong> (<em>str</em>) – chart title</li>
 <li><strong>x_axis_name</strong> (<em>str</em>) – used as label on x_axis</li>
@@ -187,6 +198,8 @@ This limitation drastically simplifies the implementation. Examples of what WON�
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>values, categories parameters can only correspond to columns.</p>
 </dd></dl>
 
 <dl class="attribute">
