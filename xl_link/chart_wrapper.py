@@ -1,6 +1,8 @@
 from abc import abstractmethod
 import importlib
-from xl_link.xl_types import XLCell, to_series
+from xl_link.xl_types import to_series
+
+from distutils.version import StrictVersion
 
 imported = {}
 
@@ -8,6 +10,16 @@ s = to_series
 
 SINGLE_CATEGORY_CHARTS = ['bar', 'area', 'doughnut', 'line', 'pie', 'radar', 'stock', 'column']
 CATEGORIES_REQUIRED_CHARTS = ['scatter']
+
+MIN_VERSIONS = {'xlsxwriter': '0.9',
+                'openpyxl': '2.4'}
+
+
+def check_engine_compatible(engine):
+    min_version = MIN_VERSIONS.get(engine.__name__, 0)
+    if StrictVersion(engine.__version__) < StrictVersion(min_version):
+        raise ImportError(("excel writer engine not met version requirements for xl_link:"
+                           "{} < {}").format(engine.__version__ < min_version))
 
 
 def ensure_list(specifier):
@@ -222,6 +234,7 @@ def create_chart(workbook, engine, type_, values, categories, names, subtype=Non
 
     if engine not in imported:
         engine_mod = importlib.import_module(engine)
+        check_compatible(engine_mod)
         imported[engine] = engine_mod
 
     if engine == 'xlsxwriter':

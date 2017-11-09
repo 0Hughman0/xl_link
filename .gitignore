@@ -58,3 +58,11 @@ Temporary Items
 # Excel files
 /tests/test_cases
 /env
+
+# PyPi files
+MANIFEST
+setup.cfg
+setup.py
+/build
+/dist
+/xl_link.egg-info

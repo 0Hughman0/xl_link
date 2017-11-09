@@ -465,7 +465,7 @@ class XLDataFrame(pd.DataFrame):
                  float_format=None, columns=None, header=True, index=True,
                  index_label=None, startrow=0, startcol=0, engine=None,
                  merge_cells=True, encoding=None, inf_rep='inf', verbose=True,
-                 freeze_panes=None):
+                 **kwargs):
         """
 
         Monkeypatched DataFrame.to_excel by xl_link!
@@ -496,7 +496,7 @@ class XLDataFrame(pd.DataFrame):
                  float_format=float_format, columns=columns, header=header, index=index,
                  index_label=index_label, startrow=startrow, startcol=startcol, engine=engine,
                  merge_cells=merge_cells, encoding=encoding, inf_rep=inf_rep, verbose=verbose,
-                 freeze_panes=freeze_panes)
+                 **kwargs)
 
         if need_save:
             excel_writer.save()
