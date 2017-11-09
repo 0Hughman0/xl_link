@@ -263,8 +263,15 @@ class XLMap:
         ----------
         type_ : str
             Type of chart to create.
-        values, categories, names: str or list or tuple
-            label or list of labels to corresponding to column to use as values and categories and names for each series in chart.
+        values : str or list or tuple
+            label or list of labels to corresponding to column to use as values for each series in chart.
+            Default all columns.
+        categories : str or list or tuple
+            label or list of labels to corresponding to column to use as categories for each series in chart.
+            Default, use index for 'scatter' or None for everything else.
+        names: str or list or tuple
+            str or list of strs to corresponding to names for each series in chart.
+            Default, column names corresponding to values.
         subtype : str
             subtype of type, only available for some chart types e.g. bar, see Excel writing package for details
         title : str
@@ -279,6 +286,10 @@ class XLMap:
 
         Chart object corresponding to the engine selected
 
+        Notes
+        -----
+        values, categories parameters can only correspond to columns.
+
         """
 
         if names is None and categories is None:
@@ -286,7 +297,7 @@ class XLMap:
         elif names is None and isinstance(categories, (str, int, list, tuple)):
             names = categories
         elif isinstance(names, (list, tuple)):
-            names = tuple(self.f[names].columns.values)
+            names = names
         else:
             raise TypeError("Couldn't understand names input: " + names)
 
@@ -484,13 +495,18 @@ class XLDataFrame(pd.DataFrame):
 
         Pandas.DataFrame.to_excel for info on parameters
 
+        Note
+        ----
+        When providing a path as excel_writer, default engine used is 'xlsxwriter', as xlsxwriter workbooks can only be
+        saved once, xl_link suppresses calling `excel_writer.save()`, as a result, `xlmap.writer.save()` should be
+        called once no further changes are to be made to the spreadsheet.
         """
 
         if isinstance(excel_writer, pd.ExcelWriter):
             need_save = False
         else:
             excel_writer = pd.ExcelWriter(_stringify_path(excel_writer), engine=engine)
-            need_save = True
+            need_save = True if excel_writer.engine != 'xlsxwriter' else False # xlsxwriter can only save once!
 
         super().to_excel(excel_writer, sheet_name=sheet_name, na_rep=na_rep,
                  float_format=float_format, columns=columns, header=header, index=index,
