@@ -196,6 +196,19 @@ class XLMap:
     f : DataFrame
      that has been written to excel.
 
+    Attributes
+    ----------
+    index : XLRange
+        range that the index column occupies
+    columns : XLRange
+        range that the frame columns occupy
+    data : XLRange
+        range that the frame data occupies
+    writer : Pandas.ExcelWriter
+        writer used to create spreadsheet
+    sheet : object
+        sheet object corresponding to sheet the frame was written to, handy if you want insert a chart into the same sheet
+
     Examples
     --------
     >>> calories_per_meal = XLDataFrame(columns=("Meal", "Mon", "Tues", "Weds", "Thur"),
@@ -296,7 +309,7 @@ class XLMap:
             names = tuple(name for name in self.f.columns.values)
         elif names is None and isinstance(categories, (str, int, list, tuple)):
             names = categories
-        elif isinstance(names, (list, tuple)):
+        elif isinstance(names, (str, list, tuple)):
             names = names
         else:
             raise TypeError("Couldn't understand names input: " + names)

@@ -34,6 +34,15 @@ class XLCell:
     sheet: str
         corresponding to the sheet the cell is in, default='Sheet1'
 
+    Attributes
+    ---------
+    row : int
+        corresponding to cell row number (0 indexed)
+    col : int
+        corresponding to cell col number (0 indexed)
+    sheet: str
+        corresponding to the sheet the cell is in, default='Sheet1'
+
     Examples
     --------
     >>> XLCell(0, 5, 'Accounts')
@@ -69,7 +78,7 @@ class XLCell:
         """
         Alternative constructor
 
-        Paramters
+        Parameters
         ---------
         cell : str
             cell in excel notation (e.g. 'A1'), representing cell location.
@@ -88,7 +97,7 @@ class XLCell:
         """
         Alternative constructor
 
-        Paramters
+        Parameters
         ---------
         fcell: str
             cell in excel formula notation (e.g. "'Sheet1'!A1"), representing cell location.
@@ -252,6 +261,15 @@ class XLRange:
         corresponding to start cell
     stop : XLCell
         corresponding to stop cell
+
+    Attributes
+    ----------
+    start : XLCell
+        corresponding to start cell
+    stop : XLCell
+        corresponding to stop cell
+    sheet : str
+        name of sheet range exists in
 
     Examples
     --------

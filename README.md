@@ -1,6 +1,6 @@
 # XLLink for Pandas
 
-**API docs: https://0hughman0.github.io/xl_link/api.html**
+**Quick-start: https://0hughman0.github.io/xl_link/quickstart.html**
 
 **Installation: `pip install xl_link`**
 
