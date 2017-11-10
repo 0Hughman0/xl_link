@@ -1,0 +1,303 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Quick-start &#8212; XLlink 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Charts" href="charts.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quick-start">
+<h1>Quick-start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>Quick-start for xl_link</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>xl_link depends on at least Pandas 0.19.</p>
+<p>On windows this is most easily installable by using Anaconda which you can get here:</p>
+<p><a class="reference external" href="https://www.anaconda.com/download/">https://www.anaconda.com/download/</a></p>
+<p>Anaconda is a Python installation pre-packed Pandas with a bunch of scientific python libraries, including Pandas.</p>
+<p>To install is as simple as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">xl_link</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="excel-engines">
+<h2>Excel Engines<a class="headerlink" href="#excel-engines" title="Permalink to this headline">¶</a></h2>
+<p>Similarly to Pandas xl_link provides a wrapper to some popular excel writing modules,
+which it uses to provide easy chart creation from DataFrames.</p>
+<p>Which one you use is dependent on what features you want, and what API syle you prefer.</p>
+<p>Currently supported engines are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>XlsxWriter: <a class="reference external" href="http://xlsxwriter.readthedocs.io">http://xlsxwriter.readthedocs.io</a> (version &gt;=0.9)</li>
+<li>openpyxl: <a class="reference external" href="https://openpyxl.readthedocs.io">https://openpyxl.readthedocs.io</a> (version &gt;=2.4)</li>
+</ul>
+</div></blockquote>
+<p>Both of which are very similar, and both of which are also installable through pip.</p>
+</div>
+<div class="section" id="pandas-dataframes">
+<h2>Pandas DataFrames<a class="headerlink" href="#pandas-dataframes" title="Permalink to this headline">¶</a></h2>
+<p>Pandas is a ‘Powerful data analysis toolkit’, key to it is the <code class="docutils literal"><span class="pre">DataFrame</span></code> object. A <code class="docutils literal"><span class="pre">DataFrame</span></code> is essentially a table,
+but pandas provides a ton of additional methods and properties that make manipulating these DataFrames easy.</p>
+<p>For more detail on some of the capabilities of pandas check out their documentation here:</p>
+<p><a class="reference external" href="http://pandas.pydata.org/">http://pandas.pydata.org/</a></p>
+<p>From our perspective the most important feature of DataFrames is that they can be exported as Excel spreadsheets.</p>
+<p>This is done by calling the <code class="docutils literal"><span class="pre">to_excel</span></code> method e.g.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span>
+<span class="go">                           &#39;y&#39;: list(range(10, 20))})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;book.xlsx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Whilst this is useful, what if you want to add things to <code class="docutils literal"><span class="pre">book.xlsx</span></code> based off of f? With both <cite>xlsxwriter</cite> and <cite>openpyxl</cite>, you need to know either the cell name or range
+or the row and column number to make changes. Given that you know the shape of your DataFrame, and where in the spreadsheet they were written surely there must be a way to know where each element of your frame is in the document…?</p>
+<p>This is where xl_link steps in. xl_link provides a subclass of <code class="docutils literal"><span class="pre">DataFrame</span></code>, <code class="docutils literal"><span class="pre">XLDataFrame</span></code> where the <code class="docutils literal"><span class="pre">to_excel</span></code> method has been modified to return an <code class="docutils literal"><span class="pre">XLMap</span></code> object:</p>
+</div>
+<div class="section" id="the-xlmap-class">
+<h2>The XLMap class<a class="headerlink" href="#the-xlmap-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">XLMap</span></code> class is returned from <code class="docutils literal"><span class="pre">XLDataFrames.to_excel</span></code>, and acts similarly to the original DataFrame, however, rather than holding the data from the original frame, it holds it’s position within the spreadsheet.</p>
+<p>This is perhaps easier to demonstrate:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">xl_link</span> <span class="k">import</span> <span class="n">XLDataFrame</span> <span class="c1"># Rather than pandas DataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">XLDataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span>
+<span class="go">                          &#39;y&#39;: list(range(10, 20))})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;book.xlsx&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span>
+<span class="go">        &lt;XLMap: index: &lt;XLRange: &#39;Sheet1&#39;!A2:A11&gt;, columns: &lt;XLRange: &#39;Sheet1&#39;!B1:C1&gt;, data: &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;&gt;</span>
+</pre></div>
+</div>
+<p>so xlmap represents a <cite>f</cite> within Sheet1, where the index occupies A2:A11, the columns occupy B1:C1, and the data B2:C11.</p>
+<p><code class="docutils literal"><span class="pre">index</span></code>, <code class="docutils literal"><span class="pre">columns</span></code> and <code class="docutils literal"><span class="pre">data</span></code> are all attributes of xlmap, and can be accessed directly.
+These attributes are all XLRange objects, simply represent a range in a spreadsheet, and can be turned into their corresponding range string through <code class="docutils literal"><span class="pre">xl_range.range</span></code>, they can do a bunch of other stuff which you should check out in the API!</p>
+<p>As well as the <code class="docutils literal"><span class="pre">index</span></code>, <code class="docutils literal"><span class="pre">columns</span></code> and <code class="docutils literal"><span class="pre">data</span></code> attributes, you can also use pandas indexing on the <code class="docutils literal"><span class="pre">XLMap</span></code> to get <code class="docutils literal"><span class="pre">XLRange</span></code> s and <code class="docutils literal"><span class="pre">XLCell</span></code> s:</p>
+<p>At present <code class="docutils literal"><span class="pre">XLMap</span></code> implements <code class="docutils literal"><span class="pre">loc</span></code>, <code class="docutils literal"><span class="pre">iloc</span></code>, <code class="docutils literal"><span class="pre">at</span></code> and <code class="docutils literal"><span class="pre">iat</span></code> indexing, as well as <code class="docutils literal"><span class="pre">__getitem__</span></code> (e.g. <code class="docutils literal"><span class="pre">f['x']</span></code>). Here are some examples:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">data</span>
+<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!C4:C5&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!C2:C11&gt;</span>
+</pre></div>
+</div>
+<p>These methods become particuarly useful when combined with your excel engine of choice.
+Both <code class="docutils literal"><span class="pre">xlsxwriter</span></code> and <code class="docutils literal"><span class="pre">openpyxl</span></code> are based on workbook, and worksheet classes, and more detail of using them can be found in their respective documentation.
+xl_link utilises the <code class="docutils literal"><span class="pre">pandas.ExcelWriter</span></code> class which wraps both xlsxwriter and openpyxl, providing access to the worksheet and workbook for a particuar document.
+<code class="docutils literal"><span class="pre">pandas.ExcelWriter</span></code> object can be created directly, taking the filename, and engine as parameters e.g.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="s1">&#39;example.xlsx&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span>
+<span class="go">        &lt;pandas.io.excel._XlsxWriter at 0x283dd9cf588&gt;</span>
+</pre></div>
+</div>
+<p>And the workbook object can be accessed with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">book</span>
+<span class="go">        &lt;xlsxwriter.workbook.Workbook at 0x283dd9cf3c8&gt;</span>
+</pre></div>
+</div>
+<p>a dictionary of the workbook’s sheets:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">sheets</span>
+</pre></div>
+</div>
+<p>When looking through the documentation for your excel engine, knowing how to access your workbook and sheets is very useful.</p>
+<p>A pandas <code class="docutils literal"><span class="pre">ExcelWriter</span></code> can be passed as the first argument to <code class="docutils literal"><span class="pre">XLDataFrame.to_excel</span></code>, or if a path is provided, internally, a writer is created, corresponding to the filename and engine.</p>
+<p><code class="docutils literal"><span class="pre">XLMap</span></code> keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet**s**!) e.g. with xlmap from above:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span>
+<span class="go">        &lt;pandas.io.excel._XlsxWriter at 0x283db2cccc0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">sheet</span>
+<span class="go">        &lt;xlsxwriter.worksheet.Worksheet at 0x283db2cca20&gt;</span>
+</pre></div>
+</div>
+<p>The sheet attribute is handy for adding charts to the same sheet as your frame!</p>
+<div class="section" id="note">
+<h3>Note<a class="headerlink" href="#note" title="Permalink to this headline">¶</a></h3>
+<p>when using <code class="docutils literal"><span class="pre">xlsxwriter</span></code> as your engine, because <code class="docutils literal"><span class="pre">xlsxwriter</span></code> can’t modify existing documents,
+xl_link suppresses the saving of <code class="docutils literal"><span class="pre">xlsxwriter.workbook.Workbook</span></code> objects after calling to_excel (the default behaviour in Pandas). This means your spreadsheet won’t appear until you explicitly save it this can be done by calling <code class="docutils literal"><span class="pre">ExcelWriter.save()</span></code> e.g.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="go">or</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="go">or if directly using a Workbook object</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">workbook</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="charts">
+<h2>Charts<a class="headerlink" href="#charts" title="Permalink to this headline">¶</a></h2>
+<p>The final thing <code class="docutils literal"><span class="pre">XLMaps</span></code> can do is generate charts. These charts belong to whatever engine you are using, so if there are any tweaks you want to make to the charts,
+first check out the <code class="docutils literal"><span class="pre">XLMap.create_chart</span></code> method in the API (because there might be an easy way!), or check out the chart docs in your excel engine.</p>
+<p>The <code class="docutils literal"><span class="pre">create_chart</span></code> method is intended to be similar to the <code class="docutils literal"><span class="pre">DataFrame.plot</span></code> method, whereby sensible defaults mean you often hardly have to specify any arguments.</p>
+<p>Expanding on the example above:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Let</span><span class="s1">&#39;s make some changes to f</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">Get</span> <span class="n">our</span> <span class="n">XLMap</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s1">&#39;chart.xlsx&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;openpyxl&#39;</span><span class="p">)</span>
+
+    <span class="n">create</span> <span class="n">a</span> <span class="n">scatter</span> <span class="n">chart</span><span class="p">,</span> <span class="ow">and</span> <span class="n">insert</span> <span class="n">it</span> <span class="n">into</span> <span class="n">the</span> <span class="n">document</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">chart</span> <span class="o">=</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">create_chart</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;D1&#39;</span><span class="p">)</span> <span class="c1"># from openpyxl docs (xlsxwriter is different!)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Creates:</p>
+<img alt="_images/scatterexample.PNG" src="_images/scatterexample.PNG" />
+<p>The first parameter is the chart type, all chart types for each engine should be supported i.e.:</p>
+<p>xlsxwriter:</p>
+<blockquote>
+<div>area
+bar
+column
+line
+pie
+doughnut
+scatter
+stock
+radar</div></blockquote>
+<p>check out their chart docs here: <a class="reference external" href="http://xlsxwriter.readthedocs.io/chart.html">http://xlsxwriter.readthedocs.io/chart.html</a></p>
+<p>openpyxl:</p>
+<blockquote>
+<div>Area Charts
+Bar and Column Charts
+Bubble Charts
+Line Charts
+Scatter Charts
+Pie Charts
+Doughnut Charts
+Radar Charts
+Stock Charts
+Surface charts</div></blockquote>
+<p>check out their chart docs here: <a class="reference external" href="https://openpyxl.readthedocs.io/en/default/charts/introduction.html">https://openpyxl.readthedocs.io/en/default/charts/introduction.html</a></p>
+<p>chart subtypes are also supported, just pass the <code class="docutils literal"><span class="pre">subtype</span></code> keyword parameter to <code class="docutils literal"><span class="pre">create_chart</span></code></p>
+<p>Other parameters you may want to use are:</p>
+<p><strong>values</strong> - in all charts is the dependent variable (e.g. y)
+<strong>categories</strong> - for most charts this is used to categorise values data, but can also be used as x values (e.g. in scatter), multiple series can be under the same category.
+<strong>names</strong> - these are used to label each series.</p>
+<p>Things to keep in mind is, how to add your chart to a sheet. e.g.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="ow">in</span> <span class="n">xlsxwriter</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">insert_chart</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span> <span class="c1"># position comes first</span>
+
+    <span class="ow">in</span> <span class="n">openpyxl</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;A1&#39;</span><span class="p">)</span> <span class="c1"># position comes second</span>
+</pre></div>
+</div>
+<p>Make sure you don’t mix two different engines, also charts can only be inserted into a sheet from the workbook that created it.</p>
+</div>
+<div class="section" id="where-next">
+<h2>Where Next?<a class="headerlink" href="#where-next" title="Permalink to this headline">¶</a></h2>
+<p>That concludes the quickstart for xl_link, any feedback or questions, submit an issue on the xl_link github: <a class="reference external" href="https://github.com/0Hughman0/xl_link/issues">https://github.com/0Hughman0/xl_link/issues</a></p>
+<p>Check out the API docs for more info!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">XLlink</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charts.html">Charts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick-start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#excel-engines">Excel Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pandas-dataframes">Pandas DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-xlmap-class">The XLMap class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#charts">Charts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-next">Where Next?</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="charts.html" title="previous chapter">Charts</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Hugh Ramsden.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/quickstart.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

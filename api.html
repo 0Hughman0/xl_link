@@ -42,9 +42,9 @@
             
   <div class="section" id="api">
 <h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-</div>
-<span class="target" id="module-xl_link"></span><dl class="class">
+<div class="section" id="module-xl_link">
+<span id="xl-link"></span><h2>xl_link<a class="headerlink" href="#module-xl_link" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="xl_link.XLDataFrame">
 <em class="property">class </em><code class="descclassname">xl_link.</code><code class="descname">XLDataFrame</code><span class="sig-paren">(</span><em>data=None</em>, <em>index=None</em>, <em>columns=None</em>, <em>dtype=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLDataFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Monkeypatched DataFrame modified by xl_link!</p>
@@ -120,6 +120,36 @@ This limitation drastically simplifies the implementation. Examples of what WON�
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="xl_link.XLMap.index">
+<code class="descname">index</code><a class="headerlink" href="#xl_link.XLMap.index" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the index column occupies</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.columns">
+<code class="descname">columns</code><a class="headerlink" href="#xl_link.XLMap.columns" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the frame columns occupy</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.data">
+<code class="descname">data</code><a class="headerlink" href="#xl_link.XLMap.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the frame data occupies</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.writer">
+<code class="descname">writer</code><a class="headerlink" href="#xl_link.XLMap.writer" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Pandas.ExcelWriter</em> – writer used to create spreadsheet</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.XLMap.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>object</em> – sheet object corresponding to sheet the frame was written to, handy if you want insert a chart into the same sheet</p>
+</dd></dl>
+
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">calories_per_meal</span> <span class="o">=</span> <span class="n">XLDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Meal&quot;</span><span class="p">,</span> <span class="s2">&quot;Mon&quot;</span><span class="p">,</span> <span class="s2">&quot;Tues&quot;</span><span class="p">,</span> <span class="s2">&quot;Weds&quot;</span><span class="p">,</span> <span class="s2">&quot;Thur&quot;</span><span class="p">),</span>
 <span class="go">                                     data={&#39;Meal&#39;: (&#39;Breakfast&#39;, &#39;Lunch&#39;, &#39;Dinner&#39;, &#39;Midnight Snack&#39;),</span>
@@ -156,7 +186,7 @@ This limitation drastically simplifies the implementation. Examples of what WON�
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">location corresponding to position value within spreadsheet.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
 </tr>
 </tbody>
 </table>
@@ -219,7 +249,7 @@ Default, column names corresponding to values.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">location corresponding to position value within spreadsheet.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
 </tr>
 </tbody>
 </table>
@@ -241,7 +271,7 @@ Default, column names corresponding to values.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
 </tr>
 </tbody>
 </table>
@@ -263,7 +293,7 @@ Default, column names corresponding to values.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
 </tr>
 </tbody>
 </table>
@@ -285,7 +315,7 @@ Default, column names corresponding to values.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
 </tr>
 </tbody>
 </table>
@@ -360,7 +390,10 @@ DataFrame uses MultiIndex.</li>
 </table>
 </dd></dl>
 
-<span class="target" id="module-xl_link.xl_types"></span><dl class="class">
+</div>
+<div class="section" id="module-xl_link.xl_types">
+<span id="xl-types-py"></span><h2>xl_types.py<a class="headerlink" href="#module-xl_link.xl_types" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="xl_link.xl_types.XLRange">
 <em class="property">class </em><code class="descclassname">xl_link.xl_types.</code><code class="descname">XLRange</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represents a range in an Excel spreadsheet</p>
@@ -369,13 +402,31 @@ DataFrame uses MultiIndex.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>start</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to start cell</li>
-<li><strong>stop</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to stop cell</li>
+<li><strong>start</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to start cell</li>
+<li><strong>stop</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to stop cell</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.start">
+<code class="descname">start</code><a class="headerlink" href="#xl_link.xl_types.XLRange.start" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLCell</em> – corresponding to start cell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.stop">
+<code class="descname">stop</code><a class="headerlink" href="#xl_link.xl_types.XLRange.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLCell</em> – corresponding to stop cell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.xl_types.XLRange.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – name of sheet range exists in</p>
+</dd></dl>
+
 <p class="rubric">Examples</p>
 <p>Using __init__</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">)</span>
@@ -390,7 +441,7 @@ DataFrame uses MultiIndex.</li>
 <p>All methods are designed to return new objects, preserving the state of self.</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange.from_range" title="xl_link.xl_types.XLRange.from_range"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_range</span></code></a>, <a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange.from_frange" title="xl_link.xl_types.XLRange.from_frange"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_frange</span></code></a></p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLRange.from_range" title="xl_link.xl_types.XLRange.from_range"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_range</span></code></a>, <a class="reference internal" href="#xl_link.xl_types.XLRange.from_frange" title="xl_link.xl_types.XLRange.from_frange"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_frange</span></code></a></p>
 </div>
 <dl class="attribute">
 <dt id="xl_link.xl_types.XLRange.frange">
@@ -428,7 +479,7 @@ DataFrame uses MultiIndex.</li>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">initialised XLRange</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
 </tr>
 </tbody>
 </table>
@@ -451,7 +502,7 @@ DataFrame uses MultiIndex.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">initialised XLRange</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
 </td>
 </tr>
 </tbody>
@@ -538,7 +589,7 @@ DataFrame uses MultiIndex.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new with translation applied</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
 </td>
 </tr>
 </tbody>
@@ -566,6 +617,24 @@ DataFrame uses MultiIndex.</li>
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.row">
+<code class="descname">row</code><a class="headerlink" href="#xl_link.xl_types.XLCell.row" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – corresponding to cell row number (0 indexed)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.col">
+<code class="descname">col</code><a class="headerlink" href="#xl_link.xl_types.XLCell.col" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – corresponding to cell col number (0 indexed)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.xl_types.XLCell.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – corresponding to the sheet the cell is in, default=’Sheet1’</p>
+</dd></dl>
+
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">XLCell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Accounts&#39;</span><span class="p">)</span>
 <span class="go">    &lt;XLCell: F1&gt;</span>
@@ -585,7 +654,7 @@ DataFrame uses MultiIndex.</li>
 <p>All methods are designed to return new objects, preserving the state of self.</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell.from_cell" title="xl_link.xl_types.XLCell.from_cell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_cell</span></code></a>, <a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell.from_fcell" title="xl_link.xl_types.XLCell.from_fcell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_fcell</span></code></a></p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLCell.from_cell" title="xl_link.xl_types.XLCell.from_cell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_cell</span></code></a>, <a class="reference internal" href="#xl_link.xl_types.XLCell.from_fcell" title="xl_link.xl_types.XLCell.from_fcell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_fcell</span></code></a></p>
 </div>
 <dl class="attribute">
 <dt id="xl_link.xl_types.XLCell.cell">
@@ -618,7 +687,7 @@ DataFrame uses MultiIndex.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">copy of self</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
 </tr>
 </tbody>
 </table>
@@ -650,19 +719,21 @@ DataFrame uses MultiIndex.</li>
 <dt id="xl_link.xl_types.XLCell.from_cell">
 <em class="property">classmethod </em><code class="descname">from_cell</code><span class="sig-paren">(</span><em>cell</em>, <em>sheet='Sheet1'</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.from_cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alternative constructor</p>
-<dl class="docutils">
-<dt>cell <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>cell in excel notation (e.g. ‘A1’), representing cell location.</dd>
-<dt>sheet <span class="classifier-delimiter">:</span> <span class="classifier">sheet</span></dt>
-<dd>sheet cell belongs to, default=’Sheet1’</dd>
-</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Initialised XLCell</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell</strong> (<em>str</em>) – cell in excel notation (e.g. ‘A1’), representing cell location.</li>
+<li><strong>sheet</strong> (<a class="reference internal" href="#xl_link.XLMap.sheet" title="xl_link.XLMap.sheet"><em>sheet</em></a>) – sheet cell belongs to, default=’Sheet1’</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Initialised XLCell</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -672,17 +743,15 @@ DataFrame uses MultiIndex.</li>
 <dt id="xl_link.xl_types.XLCell.from_fcell">
 <em class="property">classmethod </em><code class="descname">from_fcell</code><span class="sig-paren">(</span><em>fcell</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.from_fcell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alternative constructor</p>
-<dl class="docutils">
-<dt>fcell: str</dt>
-<dd>cell in excel formula notation (e.g. “‘Sheet1’!A1”), representing cell location.</dd>
-</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Initialised XLCell</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fcell</strong> (<em>str</em>) – cell in excel formula notation (e.g. “‘Sheet1’!A1”), representing cell location.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Initialised XLCell</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
 </tr>
 </tbody>
 </table>
@@ -696,11 +765,11 @@ DataFrame uses MultiIndex.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – other XLCell that makes up stop of excel range</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – other XLCell that makes up stop of excel range</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">range between this cell and other</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
 </tr>
 </tbody>
 </table>
@@ -746,7 +815,7 @@ DataFrame uses MultiIndex.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new cell with translation applied</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="xl_types.html#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></p>
 </td>
 </tr>
 </tbody>
@@ -755,7 +824,10 @@ DataFrame uses MultiIndex.</li>
 
 </dd></dl>
 
-<span class="target" id="module-xl_link.chart_wrapper"></span><dl class="function">
+</div>
+<div class="section" id="module-xl_link.chart_wrapper">
+<span id="chart-wrapper-py"></span><h2>chart_wrapper.py<a class="headerlink" href="#module-xl_link.chart_wrapper" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
 <dt id="xl_link.chart_wrapper.create_chart">
 <code class="descclassname">xl_link.chart_wrapper.</code><code class="descname">create_chart</code><span class="sig-paren">(</span><em>workbook</em>, <em>engine</em>, <em>type_</em>, <em>values</em>, <em>categories</em>, <em>names</em>, <em>subtype=None</em>, <em>title=None</em>, <em>x_axis_name=None</em>, <em>y_axis_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.create_chart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a chart object corresponding to given engine, within sheet.</p>
@@ -767,8 +839,8 @@ DataFrame uses MultiIndex.</li>
 <li><strong>workbook</strong> (<em>object</em>) – to insert chart into, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
 <li><strong>engine</strong> (<em>str</em>) – representing engine to use, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
 <li><strong>type</strong> (<em>str</em>) – representing chart type, see engine docs for options e.g. ‘line’.</li>
-<li><strong>values</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as values for each series/ data set (Excel equivalent to y data).</li>
-<li><strong>categories</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as categories for each series/ data set (Excel equivalent to x data).</li>
+<li><strong>values</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as values for each series/ data set (Excel equivalent to y data).</li>
+<li><strong>categories</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as categories for each series/ data set (Excel equivalent to x data).</li>
 <li><strong>names</strong> (<em>str/ sequence of str</em>) – use as name for each series/ data set (Excel uses this to label each dataset).</li>
 <li><strong>subtype</strong> (<em>str</em>) – representing chart subtype, see engine docs for details.</li>
 </ul>
@@ -784,6 +856,7 @@ DataFrame uses MultiIndex.</li>
 </table>
 </dd></dl>
 
+</div>
 </div>
 
 
@@ -804,11 +877,15 @@ DataFrame uses MultiIndex.</li>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul class="simple">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link">xl_link</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link.xl_types">xl_types.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link.chart_wrapper">chart_wrapper.py</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="xl_map.html">XLMap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charts.html">Charts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
 </ul>
 
 <div class="relations">
