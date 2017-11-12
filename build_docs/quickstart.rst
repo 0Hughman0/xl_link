@@ -48,10 +48,10 @@ From our perspective the most important feature of DataFrames is that they can b
 
 This is done by calling the ``to_excel`` method e.g.::
 
-    >>> import pandas as pd
-    >>> f = pd.DataFrame(data={'x': list(range(10)),
-                               'y': list(range(10, 20))})
-    >>> f.to_excel("book.xlsx")
+	>>> import pandas as pd
+	>>> f = pd.DataFrame(data={'x': list(range(10)),
+	                           'y': list(range(10, 20))})
+	>>> f.to_excel("book.xlsx")
 
 Whilst this is useful, what if you want to add things to ``book.xlsx`` based off of ``f``? With both `xlsxwriter` and `openpyxl`, you need to know either the cell name or range,
 or the row and column number to make changes. 
@@ -71,7 +71,7 @@ This is perhaps easier to demonstrate::
 	                          'y': list(range(10, 20))})
 	>>> xlmap = f.to_excel("book.xlsx")
 	>>> xlmap
-		<XLMap: index: <XLRange: 'Sheet1'!A2:A11>, columns: <XLRange: 'Sheet1'!B1:C1>, data: <XLRange: 'Sheet1'!B2:C11>>
+	     <XLMap: index: <XLRange: 'Sheet1'!A2:A11>, columns: <XLRange: 'Sheet1'!B1:C1>, data: <XLRange: 'Sheet1'!B2:C11>>
 
 so xlmap represents ``f`` within Sheet1, where the index occupies A2:A11, the columns occupy B1:C1, and the data B2:C11.
 
@@ -84,11 +84,11 @@ As well as the ``index``, ``columns`` and ``data`` attributes, you can also use 
 At present ``XLMap`` implements ``loc``, ``iloc``, ``at`` and ``iat`` indexing, as well as ``__getitem__`` (e.g. ``f['x']``). Here are some examples:
 
 	>>> xlmap.data
-		<XLRange: 'Sheet1'!B2:C11>
+	     <XLRange: 'Sheet1'!B2:C11>
 	>>> xlmap.iloc[2:4, 1]
-		<XLRange: 'Sheet1'!C4:C5>
+	     <XLRange: 'Sheet1'!C4:C5>
 	>>> xlmap['y']
-		<XLRange: 'Sheet1'!C2:C11>
+	     <XLRange: 'Sheet1'!C2:C11>
 
 These methods become particuarly useful when combined with your excel engine of choice.
 Both ``xlsxwriter`` and ``openpyxl`` are based on workbook, and worksheet classes, and more detail of using them can be found in their respective documentation. 
@@ -98,26 +98,26 @@ xl_link utilises the ``pandas.ExcelWriter`` class which wraps both xlsxwriter an
 	>>> import pandas as pd
 	>>> writer = pd.ExcelWriter('example.xlsx', engine='xlsxwriter')
 	>>> writer
-		<pandas.io.excel._XlsxWriter at 0x283dd9cf588>
-And the workbook object can be accessed with::
+	     <pandas.io.excel._XlsxWriter at 0x283dd9cf588>
+The workbook object can be accessed with::
 
 	>>> writer.book
-		<xlsxwriter.workbook.Workbook at 0x283dd9cf3c8>
-		
-a dictionary of the workbook's sheets::
+	     <xlsxwriter.workbook.Workbook at 0x283dd9cf3c8>
+
+And a dictionary of the workbook's sheets::
 
 	>>> writer.sheets
-	
+
 When looking through the documentation for your excel engine, knowing how to access your workbook and sheets is very useful.
 
 A pandas ``ExcelWriter`` can be passed as the first argument to ``XLDataFrame.to_excel``, or if a path is provided, internally, a writer is created, corresponding to the filename and engine.
 
-``XLMap`` keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet **s** !) e.g. with xlmap from above::
+``XLMap`` keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet**s**!) e.g. with xlmap from above::
 
 	>>> xlmap.writer
-		<pandas.io.excel._XlsxWriter at 0x283db2cccc0>
+	     <pandas.io.excel._XlsxWriter at 0x283db2cccc0>
 	>>> xlmap.sheet
-		<xlsxwriter.worksheet.Worksheet at 0x283db2cca20>
+	     <xlsxwriter.worksheet.Worksheet at 0x283db2cca20>
 
 The sheet attribute is handy for adding charts to the same sheet as your frame!
 
@@ -125,7 +125,7 @@ Note
 ++++
 when using ``xlsxwriter`` as your engine, because ``xlsxwriter`` can't modify existing documents,
 xl_link suppresses the saving of ``xlsxwriter.workbook.Workbook`` objects after calling to_excel (the default behaviour in Pandas). This means your spreadsheet won't appear until you explicitly save it this can be done by calling ``ExcelWriter.save()`` e.g.::
-		
+
 	>>> xlmap.writer.save()
 	
 	or 
@@ -135,7 +135,7 @@ xl_link suppresses the saving of ``xlsxwriter.workbook.Workbook`` objects after 
 	or if directly using a Workbook object
 	
 	>>> workbook.save()
-	
+
 Charts
 ======
 
@@ -146,7 +146,7 @@ The ``create_chart`` method is intended to be similar to the ``DataFrame.plot`` 
 
 Expanding on the example above::
 
-    Let's make some changes to f
+	Let's make some changes to f
 	
 	>>> f['y2'] = [1, 6, 8, 1, 4, 8, 3, 8, 7, 10]
 	>>> f.set_index('x', inplace=True, drop=True)
@@ -160,7 +160,7 @@ Expanding on the example above::
 	>>> chart = xlmap.create_chart('scatter')
 	>>> xlmap.sheet.add_chart(chart, 'D1') # from openpyxl docs (xlsxwriter is different!)
 	>>> xlmap.writer.save()
-	
+
 Creates:
 
 .. image:: _static/scatterexample.PNG
@@ -183,7 +183,7 @@ check out their chart docs here: http://xlsxwriter.readthedocs.io/chart.html
 
 **openpyxl** :
 
-	
+
 
     * Area Charts
     * Bar and Column Charts
@@ -212,14 +212,14 @@ Other parameters you may want to use are:
 
 Things to keep in mind is, how to add your chart to a sheet. e.g.::
 
-    in xlsxwriter
+	in xlsxwriter
 	
 	>>> sheet.insert_chart('A1', chart) # position comes first
 	
 	in openpyxl
 	
 	>>> sheet.add_chart(chart, 'A1') # position comes second
-	
+
 Make sure you don't mix two different engines, also charts can only be inserted into a sheet from the workbook that created it.
 
 Where Next?

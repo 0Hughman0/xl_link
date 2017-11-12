@@ -109,6 +109,7 @@ class XLCell:
         """
         try:
             sheet, cell = fcell.split('!')
+            sheet = sheet.replace("'", "")
         except ValueError:
             raise ValueError("""Could not parse fcell: {}, is your fcell in the form "'Sheet1'!A1:B2"?""".format(fcell))
         return cls(*xl_cell_to_rowcol(cell), sheet)
@@ -248,6 +249,16 @@ class XLCell:
         cell.col += col or 0
         return cell
 
+    def trans(self, row, col):
+        """
+        Short for XLCell.translate
+
+        See Also
+        --------
+        XLCell.translate
+        """
+        return self.translate(row, col)
+
     def __hash__(self):
         return hash((self.row, self.col, self.sheet))
 
@@ -295,7 +306,7 @@ class XLRange:
     """
     def __init__(self, start, stop):
         assert start.sheet == stop.sheet, "start and stop must be in the same sheet"
-        self.sheet = start.sheet
+        self._sheet = start.sheet
         self.start = start.copy()
         self.stop = stop.copy()
 
@@ -336,7 +347,16 @@ class XLRange:
             initialised XLRange
         """
         sheet, range = frange.split('!')
+        sheet = sheet.replace("'", "")
         return cls.from_range(range, sheet)
+
+    @property
+    def sheet(self):
+        return self._sheet
+
+    @sheet.setter
+    def sheet(self, value):
+        self._sheet, self.start.sheet, self.stop.sheet = value, value, value
 
     @property
     def range(self):
@@ -376,7 +396,7 @@ class XLRange:
         >>> range.frange
             "'Sheet1'!A1:B7"
         """
-        return "'{}'!{}".format(self.sheet, self.range)
+        return "'{}'!{}".format(self._sheet, self.range)
 
     @property
     def rowcol_rowcol(self):
@@ -455,7 +475,7 @@ class XLRange:
 
         Parameters
         ----------
-        key : int or slice or boolian indexer or tuple of 2 ints/ slices!
+        key : int or slice or boolean indexer or tuple of 2 ints/ slices!
 
         Returns
         -------
@@ -497,8 +517,10 @@ class XLRange:
 
             start = min(true_positions)
             stop = max(true_positions)
+            print(start)
+            print(stop)
 
-            step_is_1 = (stop - start) / len(true_positions) == 1
+            step_is_1 = ((stop - start) + 1) / len(true_positions) == 1
 
             if not step_is_1:
                 raise TypeError("Bool indexers can't have any holes in (i.e. equivalent as slice must have step=1)")
@@ -560,7 +582,7 @@ class XLRange:
         return self.start.copy() - self.stop.copy()
 
     def __hash__(self):
-        return hash((self.start.row, self.start.col, self.stop.row, self.stop.row, self.sheet))
+        return hash((self.start.row, self.start.col, self.stop.row, self.stop.row, self._sheet))
 
     def translate(self, row, col):
         """
@@ -589,3 +611,12 @@ class XLRange:
 
         return new
 
+    def trans(self, row, col):
+        """
+        Short for XLRange.translate
+
+        See Also
+        --------
+        XLRange.translate
+        """
+        return self.translate(row, col)

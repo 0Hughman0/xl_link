@@ -4,25 +4,28 @@
 
 **Installation: `pip install xl_link`**
 
-Love the functionality of Pandas, but find yourself disappointed that as soon as your DataFrame is written to excel, you loose it all?
+XLLink aims to provide a powerfull interface between Pandas DataFrames, and Excel spreadsheets.
 
-Fear not! XLLink solves this by returning the powerfull XLMap object upon use of to_excel!
+XLLink tweaks the DataFrame.to_excel method to return its own XLMap object.
 
-This xlmap supports all your favourite indexing methods, i.e. loc, iloc, at and iat, but instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
+This XLMap stores all the information about the location of the written DataFrame within the spreadsheet.
 
-Perhaps more usefully, xlmaps offer a wrapper around excel engines (currently supporting xlsxwriter and openpyxl) to make creating charts in excel far more intuitive.
+By allowing you to use Pandas indexing methods, i.e. loc, iloc, at and iat. XLLink remains intuitive to use. But instead of returning a DataFrame, Series, or scalar, XLMap will instead return the XLRange, or XLCell corresponding to the location of the result within your spreadsheet.
 
-## Chart capabilities
+Additionally XLMaps offer a wrapper around excel engines (currently supporting xlsxwriter and openpyxl) to make creating charts in excel far more intuitive. Providing a DataFrame.plot like interface for excel charts.
+
+## Chart demo
 
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
-    >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-    >>> f = XLDataFrame(data={'Y1': list(random.randrange(0, 10) for _ in range(10)),
-                               'Y2': list(random.randrange(0, 10) for _ in range(10))})
-    >>> xlmap1 = f1.to_excel(writer, sheet_name='scatter')
-    >>> scatter_chart = xlmap1.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
-    >>> xlmap1.sheet.insert_chart('D1', scatter_chart) # Puts at top of first empty col
-    >>> writer.save()
+    >>> from xl_link import XLDataFrame
+	>>> import numpy as np
+	>>> f = XLDataFrame(data={'Y1': np.random.randn(30),
+                              'Y2': np.random.randn(30)})
+    >>> xlmap = f.to_excel('Chart Demo.xlsx', sheet_name='scatter')
+    >>> scatter_chart = xlmap.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
+    >>> xlmap.sheet.insert_chart('D1', scatter_chart)
+    >>> xlmap.writer.save()
 
 Which produces this chart:
 
@@ -44,157 +47,9 @@ is as easy as:
 
     Create chart with xl_link
 
-    >>> xlmap = f.to_excel('Compare.xlsx', sheet_name="XLLinked", engine='xlsxwriter')
-    >>> xl_linked_chart = xlmap.create_chart('column', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories")
+    >>> xlmap = f.to_excel('Compare.xlsx', sheet_name="XLLinked", engine='openpyxl')
+    >>> xl_linked_chart = xlmap.create_chart('bar', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories", subtype='col')
     >>> xlmap.sheet.add_chart(xl_linked_chart, 'F1')
     >>> xlmap.writer.save()
-
-Creating the same chart without xl_link looks something like:
-
-    >>> writer = pd.ExcelWriter('Compare.xlsx', engine='xlsxwriter')
-	>>> f.to_excel(writer, sheet_name="Without")
-    >>> without_sheet = writer.sheets["Without"]
-    >>> without_chart = writer.book.add_chart({"type": "column"})
-    >>> for col_num in range(1, len(f.index) + 1):
-    >>>     without_chart.add_series({'name': ["Without", col_num, 0],
-                                      'categories': ["Without", 0, 1, 0, 4],
-                                      'values': ["Without", col_num, 1, col_num, 4]})
-    >>> without_chart.set_x_axis({'name': 'Meal'})
-    >>> without_chart.set_y_axis({'name': 'Calories'})
-    >>> without_chart.title = "Without xl_link"
-    >>> without_sheet.insert_chart('A1', without_chart)
-    >>> writer.save()
-
-With xl_link's sensible defaults, it's easy to create complex charts.
-
-xl_link passes the chart type, and subtype straight to the excel engine, so if it's in the engine's docs, it should work!
-
-### Indexing capabilities
-
-An XLMap object represents a DataFrame, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.
-
-Let's look at XLMap with a more detailed example:
-
-    >>> f = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                         data={'Mon': (15, 20, 12, 3),
-                               'Tues': (5, 16, 3, 0),
-                               'Weds': (3, 22, 2, 8),
-                               'Thur': (6, 7, 1, 9)})
-    >>> f
-                            Mon                  Tues      Weds       Thur
-        Breakfast         Toast                 Bagel    Cereal  Croissant
-        Lunch              Soup  Something Different!      Rice     Hotpot
-        Dinner            Curry                  Stew     Pasta    Gnocchi
-        Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
-
-    >>> xlmap = f.to_excel("t.xlsx")
-    >>> xlmap
-        <XLMap: index: <XLRange: 'Sheet1'!A2:A5>, columns: <XLRange: 'Sheet1'!B1:F1>, data: <XLRange: 'Sheet1'!B2:F5>>
-    >>> xlmap.index
-        <XLRange: 'Sheet1'!A2:A5>
-    >>> xlmap.columns
-        <XLRange: 'Sheet1'!B1:E1>
-
-Here are some more indexing examples:
-
-    >>> # loc
-    >>> xlmap.loc['Lunch', 'Thur']
-        <XLCell: 'Demo Sheet'!E10>
-    >>> xlmap.loc['Dinner', :]
-        <XLRange: 'Demo Sheet'!B11:E11>
-    >>> # iloc
-    >>> xlmap.iloc[3, 2]
-        <XLCell: 'Demo Sheet'!D12>
-    >>> xlmap.iloc[:, 1]
-        <XLRange: 'Demo Sheet'!C9:C12>
-    >>> # at
-    >>> xlmap.at['Midnight Snack', 'Tues']
-        <XLCell: 'Demo Sheet'!C12>
-    >>> # iat
-    >>> xlmap.iat[0, 2]
-        <XLCell: 'Demo Sheet'!D9>
-    >>> # __getitem__
-    >>> xlmap['Mon']
-        <XLCell: 'Demo Sheet'!B8>
-    >>> xlmap[['Mon', 'Tues', 'Weds']]
-        <XLRange: 'Demo Sheet'!B2:D5>
-
-For convenience, you can access a copy of the frame f, in it's state as it was written to excel:
-
-    >>> f.loc['Lunch'] = "Nom Nom Nom"
-    >>> f
-                                Mon         Tues         Weds         Thur
-        Breakfast             Toast        Bagel       Cereal    Croissant
-        Lunch           Nom Nom Nom  Nom Nom Nom  Nom Nom Nom  Nom Nom Nom
-        Dinner                Curry         Stew        Pasta      Gnocchi
-        Midnight Snack      Shmores      Cookies     Biscuits    Chocolate
-
-    >>> xlmap.f # Preserved :)
-                            Mon                  Tues      Weds       Thur
-        Breakfast         Toast                 Bagel    Cereal  Croissant
-        Lunch              Soup  Something Different!      Rice     Hotpot
-        Dinner            Curry                  Stew     Pasta    Gnocchi
-        Midnight Snack  Shmores               Cookies  Biscuits  Chocolate
-
-
-## XLRange and XLCell
-
-These are the objects used within xl_link to represent ranges and cells within excel.
-
-These objects have a ton of methods, making them powerful in themselves, if needs be, you can create them yourself:
-
-    >>> from xl_link.xl_types import XLRange, XLCell
-    >>> start = XLCell(1, 1) # using row, col
-    >>> stop = XLCell(1, 8)
-    >>> between = start - stop
-        <XLRange: 'Sheet1'!B2:I2>
-
-and you can get their location in excel notation via XLCell.cell and XLRange.range respectively:
-
-    >>> start
-        <XLCell: 'Sheet1'!B2>
-    >>> start.cell
-        'B2'
-    >>> stop
-        <XLCell: 'Sheet1'!I2>
-    >>> between
-        <XLRange: 'Sheet1'!B2:I2>
-    >>> between.range
-        'B2:I2'
-
-For convenience add the f prefix for a formula compatible version:
-
-    >>> start.fcell
-        "'Sheet1'!B2"
-    >>> between.frange
-        "'Sheet1'!B2:I2"
-
-And if you prefer to use this notation to initalise you XLRanges and XLCells, that's find too, using from_cell, from_fcell, from_range and from_frange:
-
-    >>> XLCell.from_cell("A6")
-        <XLCell: 'Sheet1'!A6>
-    >>> XLRange.from_frange("'Another Sheet'!D2:R2")
-        <XLRange: ''Another Sheet''!D2:R2>
-
-
-Translate them, get items using a range of indexers, and even iterate over 1D XLRanges:
-
-    >>> new_start = start.translate(0, 2)
-    >>> new_stop = stop.translate(0, 2)
-    >>> new_between = new_start - new_stop
-    >>> new_between
-        <XLRange: 'Sheet1'!D2:K2>
-    >>> new_between[3:]
-        <XLRange: 'Sheet1'!G2:K2>
-    >>> for cell in new_between:
-            print(cell.cell)
-        D2
-        E2
-        F2
-        G2
-        H2
-        I2
-        J2
-        K2
 
 This package uses the utility functions from XlsxWriter under the BSD license found here: https://github.com/jmcnamara/XlsxWriter

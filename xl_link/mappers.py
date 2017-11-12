@@ -262,6 +262,13 @@ class XLMap:
         """
         return self._f
 
+    @property
+    def df(self):
+        """
+        for convenience provides read-only access to the DataFrame originally written to excel.
+        """
+        return self._f
+
     def __repr__(self):
         return "<XLMap: index: {}, columns: {}, data: {}>".format(self.index, self.columns, self.data)
 
