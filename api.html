@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="XLRange and XLCell" href="xl_types.html" />
+    <link rel="prev" title="XLMap" href="xl_map.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -229,6 +229,12 @@ Default, column names corresponding to values.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>values, categories parameters can only correspond to columns.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.df">
+<code class="descname">df</code><a class="headerlink" href="#xl_link.XLMap.df" title="Permalink to this definition">¶</a></dt>
+<dd><p>for convenience provides read-only access to the DataFrame originally written to excel.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -572,6 +578,16 @@ DataFrame uses MultiIndex.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="xl_link.xl_types.XLRange.trans">
+<code class="descname">trans</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.trans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short for XLRange.translate</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLRange.translate" title="xl_link.xl_types.XLRange.translate"><code class="xref py py-meth docutils literal"><span class="pre">XLRange.translate()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="xl_link.xl_types.XLRange.translate">
 <code class="descname">translate</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.translate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates whole range by row, col.</p>
@@ -798,6 +814,16 @@ DataFrame uses MultiIndex.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="xl_link.xl_types.XLCell.trans">
+<code class="descname">trans</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.trans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short for XLCell.translate</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLCell.translate" title="xl_link.xl_types.XLCell.translate"><code class="xref py py-meth docutils literal"><span class="pre">XLCell.translate()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="xl_link.xl_types.XLCell.translate">
 <code class="descname">translate</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.translate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns new XLCell with translation applied</p>
@@ -903,6 +929,7 @@ DataFrame uses MultiIndex.</li>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_map.html">XLMap</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-xl_link">xl_link</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-xl_link.xl_types">xl_types.py</a></li>
@@ -915,7 +942,7 @@ DataFrame uses MultiIndex.</li>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="xl_types.html" title="previous chapter">XLRange and XLCell</a></li>
+      <li>Previous: <a href="xl_map.html" title="previous chapter">XLMap</a></li>
   </ul></li>
 </ul>
 </div>

@@ -96,7 +96,7 @@ or the row and column number to make changes.</p>
 <span class="go">                          &#39;y&#39;: list(range(10, 20))})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;book.xlsx&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span>
-<span class="go">        &lt;XLMap: index: &lt;XLRange: &#39;Sheet1&#39;!A2:A11&gt;, columns: &lt;XLRange: &#39;Sheet1&#39;!B1:C1&gt;, data: &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;&gt;</span>
+<span class="go">     &lt;XLMap: index: &lt;XLRange: &#39;Sheet1&#39;!A2:A11&gt;, columns: &lt;XLRange: &#39;Sheet1&#39;!B1:C1&gt;, data: &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;&gt;</span>
 </pre></div>
 </div>
 <p>so xlmap represents <code class="docutils literal"><span class="pre">f</span></code> within Sheet1, where the index occupies A2:A11, the columns occupy B1:C1, and the data B2:C11.</p>
@@ -105,11 +105,11 @@ These attributes are all XLRange objects, simply represent a range in a spreadsh
 <p>As well as the <code class="docutils literal"><span class="pre">index</span></code>, <code class="docutils literal"><span class="pre">columns</span></code> and <code class="docutils literal"><span class="pre">data</span></code> attributes, you can also use pandas indexing on the <code class="docutils literal"><span class="pre">XLMap</span></code> to get <code class="docutils literal"><span class="pre">XLRange</span></code> s and <code class="docutils literal"><span class="pre">XLCell</span></code> s:</p>
 <p>At present <code class="docutils literal"><span class="pre">XLMap</span></code> implements <code class="docutils literal"><span class="pre">loc</span></code>, <code class="docutils literal"><span class="pre">iloc</span></code>, <code class="docutils literal"><span class="pre">at</span></code> and <code class="docutils literal"><span class="pre">iat</span></code> indexing, as well as <code class="docutils literal"><span class="pre">__getitem__</span></code> (e.g. <code class="docutils literal"><span class="pre">f['x']</span></code>). Here are some examples:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">data</span>
-<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;</span>
+<span class="go">     &lt;XLRange: &#39;Sheet1&#39;!B2:C11&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!C4:C5&gt;</span>
+<span class="go">     &lt;XLRange: &#39;Sheet1&#39;!C4:C5&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
-<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!C2:C11&gt;</span>
+<span class="go">     &lt;XLRange: &#39;Sheet1&#39;!C2:C11&gt;</span>
 </pre></div>
 </div>
 <p>These methods become particuarly useful when combined with your excel engine of choice.
@@ -119,25 +119,25 @@ xl_link utilises the <code class="docutils literal"><span class="pre">pandas.Exc
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="s1">&#39;example.xlsx&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span>
-<span class="go">        &lt;pandas.io.excel._XlsxWriter at 0x283dd9cf588&gt;</span>
+<span class="go">     &lt;pandas.io.excel._XlsxWriter at 0x283dd9cf588&gt;</span>
 </pre></div>
 </div>
-<p>And the workbook object can be accessed with:</p>
+<p>The workbook object can be accessed with:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">book</span>
-<span class="go">        &lt;xlsxwriter.workbook.Workbook at 0x283dd9cf3c8&gt;</span>
+<span class="go">     &lt;xlsxwriter.workbook.Workbook at 0x283dd9cf3c8&gt;</span>
 </pre></div>
 </div>
-<p>a dictionary of the workbook’s sheets:</p>
+<p>And a dictionary of the workbook’s sheets:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">sheets</span>
 </pre></div>
 </div>
 <p>When looking through the documentation for your excel engine, knowing how to access your workbook and sheets is very useful.</p>
 <p>A pandas <code class="docutils literal"><span class="pre">ExcelWriter</span></code> can be passed as the first argument to <code class="docutils literal"><span class="pre">XLDataFrame.to_excel</span></code>, or if a path is provided, internally, a writer is created, corresponding to the filename and engine.</p>
-<p><code class="docutils literal"><span class="pre">XLMap</span></code> keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet <strong>s</strong> !) e.g. with xlmap from above:</p>
+<p><code class="docutils literal"><span class="pre">XLMap</span></code> keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet**s**!) e.g. with xlmap from above:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span>
-<span class="go">        &lt;pandas.io.excel._XlsxWriter at 0x283db2cccc0&gt;</span>
+<span class="go">     &lt;pandas.io.excel._XlsxWriter at 0x283db2cccc0&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">sheet</span>
-<span class="go">        &lt;xlsxwriter.worksheet.Worksheet at 0x283db2cca20&gt;</span>
+<span class="go">     &lt;xlsxwriter.worksheet.Worksheet at 0x283db2cca20&gt;</span>
 </pre></div>
 </div>
 <p>The sheet attribute is handy for adding charts to the same sheet as your frame!</p>
@@ -166,18 +166,18 @@ first check out the <code class="docutils literal"><span class="pre">XLMap.creat
 <p>Expanding on the example above:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Let</span><span class="s1">&#39;s make some changes to f</span>
 
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">Get</span> <span class="n">our</span> <span class="n">XLMap</span>
+<span class="n">Get</span> <span class="n">our</span> <span class="n">XLMap</span>
 
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s1">&#39;chart.xlsx&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;openpyxl&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s1">&#39;chart.xlsx&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;openpyxl&#39;</span><span class="p">)</span>
 
-    <span class="n">create</span> <span class="n">a</span> <span class="n">scatter</span> <span class="n">chart</span><span class="p">,</span> <span class="ow">and</span> <span class="n">insert</span> <span class="n">it</span> <span class="n">into</span> <span class="n">the</span> <span class="n">document</span>
+<span class="n">create</span> <span class="n">a</span> <span class="n">scatter</span> <span class="n">chart</span><span class="p">,</span> <span class="ow">and</span> <span class="n">insert</span> <span class="n">it</span> <span class="n">into</span> <span class="n">the</span> <span class="n">document</span>
 
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">chart</span> <span class="o">=</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">create_chart</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;D1&#39;</span><span class="p">)</span> <span class="c1"># from openpyxl docs (xlsxwriter is different!)</span>
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">chart</span> <span class="o">=</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">create_chart</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;D1&#39;</span><span class="p">)</span> <span class="c1"># from openpyxl docs (xlsxwriter is different!)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlmap</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Creates:</p>
@@ -222,11 +222,11 @@ first check out the <code class="docutils literal"><span class="pre">XLMap.creat
 <p>Things to keep in mind is, how to add your chart to a sheet. e.g.:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="ow">in</span> <span class="n">xlsxwriter</span>
 
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">insert_chart</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span> <span class="c1"># position comes first</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">insert_chart</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span> <span class="c1"># position comes first</span>
 
-    <span class="ow">in</span> <span class="n">openpyxl</span>
+<span class="ow">in</span> <span class="n">openpyxl</span>
 
-    <span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;A1&#39;</span><span class="p">)</span> <span class="c1"># position comes second</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sheet</span><span class="o">.</span><span class="n">add_chart</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s1">&#39;A1&#39;</span><span class="p">)</span> <span class="c1"># position comes second</span>
 </pre></div>
 </div>
 <p>Make sure you don’t mix two different engines, also charts can only be inserted into a sheet from the workbook that created it.</p>
@@ -266,6 +266,7 @@ first check out the <code class="docutils literal"><span class="pre">XLMap.creat
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_map.html">XLMap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 

@@ -18,4 +18,5 @@ Or for more detail check out the :ref:`api.rst<API>`.
 
    quickstart
    xl_types
+   xl_map
    api

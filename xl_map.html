@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quick-start" href="quickstart.html" />
+    <link rel="next" title="API" href="api.html" />
     <link rel="prev" title="XLRange and XLCell" href="xl_types.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -42,37 +42,72 @@
             
   <div class="section" id="xlmap">
 <h1>XLMap<a class="headerlink" href="#xlmap" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+<p>An XLMap object represents a DataFrame, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.</p>
+<p>Let’s look at XLMap with a more detailed example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">XLDataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Breakfast&#39;</span><span class="p">,</span> <span class="s1">&#39;Lunch&#39;</span><span class="p">,</span> <span class="s1">&#39;Dinner&#39;</span><span class="p">,</span> <span class="s1">&#39;Midnight Snack&#39;</span><span class="p">),</span>
+<span class="go">                     data={&#39;Mon&#39;: (15, 20, 12, 3),</span>
+<span class="go">                           &#39;Tues&#39;: (5, 16, 3, 0),</span>
+<span class="go">                           &#39;Weds&#39;: (3, 22, 2, 8),</span>
+<span class="go">                           &#39;Thur&#39;: (6, 7, 1, 9)})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span>
+<span class="go">                        Mon                  Tues      Weds       Thur</span>
+<span class="go">    Breakfast         Toast                 Bagel    Cereal  Croissant</span>
+<span class="go">    Lunch              Soup  Something Different!      Rice     Hotpot</span>
+<span class="go">    Dinner            Curry                  Stew     Pasta    Gnocchi</span>
+<span class="go">    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate</span>
+</pre></div>
 </div>
-<span class="target" id="module-xl_link.chart_wrapper"></span><dl class="function">
-<dt id="xl_link.chart_wrapper.create_chart">
-<code class="descclassname">xl_link.chart_wrapper.</code><code class="descname">create_chart</code><span class="sig-paren">(</span><em>workbook</em>, <em>engine</em>, <em>type_</em>, <em>values</em>, <em>categories</em>, <em>names</em>, <em>subtype=None</em>, <em>title=None</em>, <em>x_axis_name=None</em>, <em>y_axis_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.create_chart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a chart object corresponding to given engine, within sheet.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>workbook</strong> (<em>object</em>) – to insert chart into, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
-<li><strong>engine</strong> (<em>str</em>) – representing engine to use, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
-<li><strong>type</strong> (<em>str</em>) – representing chart type, see engine docs for options e.g. ‘line’.</li>
-<li><strong>values</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as values for each series/ data set (Excel equivalent to y data).</li>
-<li><strong>categories</strong> (<a class="reference internal" href="xl_types.html#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as categories for each series/ data set (Excel equivalent to x data).</li>
-<li><strong>names</strong> (<em>str/ sequence of str</em>) – use as name for each series/ data set (Excel uses this to label each dataset).</li>
-<li><strong>subtype</strong> (<em>str</em>) – representing chart subtype, see engine docs for details.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>chart</strong> – populated chart object corresponding to engine’s chart type.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;t.xlsx&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span>
+<span class="go">    &lt;XLMap: index: &lt;XLRange: &#39;Sheet1&#39;!A2:A5&gt;, columns: &lt;XLRange: &#39;Sheet1&#39;!B1:F1&gt;, data: &lt;XLRange: &#39;Sheet1&#39;!B2:F5&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">index</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!A2:A5&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">columns</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!B1:E1&gt;</span>
+</pre></div>
+</div>
+<p>Here are some more indexing examples:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># loc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Lunch&#39;</span><span class="p">,</span> <span class="s1">&#39;Thur&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!E10&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Dinner&#39;</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!B11:E11&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># iloc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!D12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!C9:C12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># at</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;Midnight Snack&#39;</span><span class="p">,</span> <span class="s1">&#39;Tues&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!C12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># iat</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!D9&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># __getitem__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[</span><span class="s1">&#39;Mon&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!B8&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[[</span><span class="s1">&#39;Mon&#39;</span><span class="p">,</span> <span class="s1">&#39;Tues&#39;</span><span class="p">,</span> <span class="s1">&#39;Weds&#39;</span><span class="p">]]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!B2:D5&gt;</span>
+</pre></div>
+</div>
+<p>For convenience, you can access a copy of the frame f, in it’s state as it was written to excel:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Lunch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Nom Nom Nom&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span>
+<span class="go">                            Mon         Tues         Weds         Thur</span>
+<span class="go">    Breakfast             Toast        Bagel       Cereal    Croissant</span>
+<span class="go">    Lunch           Nom Nom Nom  Nom Nom Nom  Nom Nom Nom  Nom Nom Nom</span>
+<span class="go">    Dinner                Curry         Stew        Pasta      Gnocchi</span>
+<span class="go">    Midnight Snack      Shmores      Cookies     Biscuits    Chocolate</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">f</span> <span class="c1"># Preserved :)</span>
+<span class="go">                        Mon                  Tues      Weds       Thur</span>
+<span class="go">    Breakfast         Toast                 Bagel    Cereal  Croissant</span>
+<span class="go">    Lunch              Soup  Something Different!      Rice     Hotpot</span>
+<span class="go">    Dinner            Curry                  Stew     Pasta    Gnocchi</span>
+<span class="go">    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate</span>
+</pre></div>
+</div>
 </div>
 
 
@@ -93,12 +128,10 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">XLMap</a><ul class="simple">
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XLMap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
 <div class="relations">
@@ -106,7 +139,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="xl_types.html" title="previous chapter">XLRange and XLCell</a></li>
-      <li>Next: <a href="quickstart.html" title="next chapter">Quick-start</a></li>
+      <li>Next: <a href="api.html" title="next chapter">API</a></li>
   </ul></li>
 </ul>
 </div>
