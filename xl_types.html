@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Charts" href="charts.html" />
-    <link rel="prev" title="API" href="api.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="Quick-start" href="quickstart.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,7 +42,100 @@
             
   <div class="section" id="xlrange-and-xlcell">
 <h1>XLRange and XLCell<a class="headerlink" href="#xlrange-and-xlcell" title="Permalink to this headline">¶</a></h1>
-<p>Documentation on the use of XLRange and XLCell… coming soon… maybe!</p>
+<p>These are the objects used within xl_link to represent ranges and cells within excel.</p>
+<p>These objects have a ton of methods, making them powerful in themselves.</p>
+<p>The primary way of getting ahold of these objects is from an <code class="docutils literal"><span class="pre">XLMap</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>Get xlmap
+
+&gt;&gt;&gt; from xl_link import XLDataFrame # Rather than pandas DataFrame
+&gt;&gt;&gt; f = XLDataFrame(data={&#39;x&#39;: list(range(10)),
+                          &#39;y&#39;: list(range(10, 20))})
+&gt;&gt;&gt; xlmap = f.to_excel(&quot;book.xlsx&quot;)
+
+Get some XLRanges and XLCells
+
+&gt;&gt;&gt; xlmap.index
+    &lt;XLRange: &#39;Sheet1&#39;!A2:A11&gt;
+&gt;&gt;&gt; xlmap[&#39;y&#39;]
+    &lt;XLRange: &#39;Sheet1&#39;!C2:C11&gt;
+&gt;&gt;&gt; xlmap.loc[3, &#39;x&#39;]
+    &lt;XLCell: &#39;Sheet1&#39;!B5&gt;
+</pre></div>
+</div>
+<p>if needs be, you can create them yourself:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">xl_link.xl_types</span> <span class="k">import</span> <span class="n">XLRange</span><span class="p">,</span> <span class="n">XLCell</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># using row, col</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span> <span class="o">=</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">between</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">stop</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!B2:I2&gt;</span>
+</pre></div>
+</div>
+<p>and you can get their location in excel notation via <code class="docutils literal"><span class="pre">XLCell.cell</span></code> and <code class="docutils literal"><span class="pre">XLRange.range</span></code> respectively:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span>
+<span class="go">    &lt;XLCell: &#39;Sheet1&#39;!B2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">start</span><span class="o">.</span><span class="n">cell</span>
+<span class="go">    &#39;B2&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span>
+<span class="go">    &lt;XLCell: &#39;Sheet1&#39;!I2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">between</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!B2:I2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">between</span><span class="o">.</span><span class="n">range</span>
+<span class="go">    &#39;B2:I2&#39;</span>
+</pre></div>
+</div>
+<p>For convenience add the f prefix for a formula compatible version:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span><span class="o">.</span><span class="n">fcell</span>
+<span class="go">    &quot;&#39;Sheet1&#39;!B2&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">between</span><span class="o">.</span><span class="n">frange</span>
+<span class="go">    &quot;&#39;Sheet1&#39;!B2:I2&quot;</span>
+</pre></div>
+</div>
+<p>And if you prefer to use this notation to initalise you <code class="docutils literal"><span class="pre">XLRange</span></code> s and <code class="docutils literal"><span class="pre">XLCell</span></code> s, that’s find too, using <code class="docutils literal"><span class="pre">from_cell</span></code>, <code class="docutils literal"><span class="pre">from_fcell</span></code>, <code class="docutils literal"><span class="pre">from_range</span></code> and <code class="docutils literal"><span class="pre">from_frange</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s2">&quot;A6&quot;</span><span class="p">)</span>
+<span class="go">    &lt;XLCell: &#39;Sheet1&#39;!A6&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">XLRange</span><span class="o">.</span><span class="n">from_frange</span><span class="p">(</span><span class="s2">&quot;&#39;Another Sheet&#39;!D2:R2&quot;</span><span class="p">)</span>
+<span class="go">    &lt;XLRange: &#39;&#39;Another Sheet&#39;&#39;!D2:R2&gt;</span>
+</pre></div>
+</div>
+<p>Translate them, get items using a range of indexers, and even iterate over 1D XLRanges:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">new_start</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_stop</span> <span class="o">=</span> <span class="n">stop</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_between</span> <span class="o">=</span> <span class="n">new_start</span> <span class="o">-</span> <span class="n">new_stop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_between</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!D2:K2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_between</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!G2:K2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">new_between</span><span class="p">:</span>
+<span class="go">        print(cell.cell)</span>
+<span class="go">    D2</span>
+<span class="go">    E2</span>
+<span class="go">    F2</span>
+<span class="go">    G2</span>
+<span class="go">    H2</span>
+<span class="go">    I2</span>
+<span class="go">    J2</span>
+<span class="go">    K2</span>
+</pre></div>
+</div>
+<p>Over 2D XLRanges you can use iterrows():</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">square</span> <span class="o">=</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">row_range</span> <span class="ow">in</span> <span class="n">square</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+<span class="go">                print(row_range)</span>
+<span class="go">                for cell in row_range:</span>
+<span class="go">                        print(cell)</span>
+<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!A1:D1&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!A1&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!B1&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!C1&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!D1&gt;</span>
+<span class="go">        ...</span>
+<span class="go">        &lt;XLRange: &#39;Sheet1&#39;!A4:D4&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!A4&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!B4&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!C4&gt;</span>
+<span class="go">        &lt;XLCell: &#39;Sheet1&#39;!D4&gt;</span>
+</pre></div>
+</div>
 </div>
 
 
@@ -63,18 +156,17 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">XLRange and XLCell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="charts.html">Charts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XLRange and XLCell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="api.html" title="previous chapter">API</a></li>
-      <li>Next: <a href="charts.html" title="next chapter">Charts</a></li>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Quick-start</a></li>
+      <li>Next: <a href="api.html" title="next chapter">API</a></li>
   </ul></li>
 </ul>
 </div>

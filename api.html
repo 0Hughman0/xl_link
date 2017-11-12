@@ -23,8 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="XLRange and XLCell" href="xl_types.html" />
-    <link rel="prev" title="Welcome to XLlink’s documentation!" href="index.html" />
+    <link rel="prev" title="XLRange and XLCell" href="xl_types.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -856,6 +855,31 @@ DataFrame uses MultiIndex.</li>
 </table>
 </dd></dl>
 
+<dl class="class">
+<dt id="xl_link.chart_wrapper.AbstractChartWrapper">
+<em class="property">class </em><code class="descclassname">xl_link.chart_wrapper.</code><code class="descname">AbstractChartWrapper</code><span class="sig-paren">(</span><em>book</em>, <em>type_</em>, <em>subtype=None</em>, <em>engine=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.AbstractChartWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps around excel writer module, for use by create_chart.</p>
+<dl class="method">
+<dt id="xl_link.chart_wrapper.AbstractChartWrapper.add_series">
+<code class="descname">add_series</code><span class="sig-paren">(</span><em>name</em>, <em>values</em>, <em>categories=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.AbstractChartWrapper.add_series" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract: should add a series to chart.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – representing the name of the series</li>
+<li><strong>values</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a>) – represending values of series</li>
+<li><strong>categories</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a>) – representing values of categories</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -877,23 +901,21 @@ DataFrame uses MultiIndex.</li>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-xl_link">xl_link</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-xl_link.xl_types">xl_types.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-xl_link.chart_wrapper">chart_wrapper.py</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="charts.html">Charts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Welcome to XLlink’s documentation!</a></li>
-      <li>Next: <a href="xl_types.html" title="next chapter">XLRange and XLCell</a></li>
+      <li>Previous: <a href="xl_types.html" title="previous chapter">XLRange and XLCell</a></li>
   </ul></li>
 </ul>
 </div>
