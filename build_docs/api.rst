@@ -18,4 +18,4 @@ chart_wrapper.py
 ================
 
 .. automodule:: xl_link.chart_wrapper
-   :members: create_chart
+   :members: create_chart, AbstractChartWrapper

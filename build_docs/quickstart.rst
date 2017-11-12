@@ -12,7 +12,7 @@ On windows this is most easily installable by using Anaconda which you can get h
 
 https://www.anaconda.com/download/
 
-Anaconda is a Python installation pre-packed Pandas with a bunch of scientific python libraries, including Pandas.
+Anaconda is a Python installation pre-packed with a bunch of scientific python libraries, including Pandas.
 
 To install is as simple as::
 
@@ -20,7 +20,7 @@ To install is as simple as::
 
 Excel Engines
 =============
-Similarly to Pandas xl_link provides a wrapper to some popular excel writing modules,
+Similarly to Pandas, xl_link provides a wrapper to some popular excel writing modules,
 which it uses to provide easy chart creation from DataFrames.
 
 
@@ -32,11 +32,11 @@ Currently supported engines are:
    * openpyxl: https://openpyxl.readthedocs.io (version >=2.4)
 
 
-Both of which are very similar, and both of which are also installable through pip.
+Both of which have similar capabilities and syntaxes, and can be installed through pip.
 
 Pandas DataFrames
 =================
-Pandas is a 'Powerful data analysis toolkit', key to it is the ``DataFrame`` object. A ``DataFrame`` is essentially a table,
+Pandas is a 'Powerful data analysis toolkit', with the core class being the ``DataFrame``. A ``DataFrame`` is essentially a table,
 but pandas provides a ton of additional methods and properties that make manipulating these DataFrames easy.
 
 
@@ -53,8 +53,10 @@ This is done by calling the ``to_excel`` method e.g.::
                                'y': list(range(10, 20))})
     >>> f.to_excel("book.xlsx")
 
-Whilst this is useful, what if you want to add things to ``book.xlsx`` based off of f? With both `xlsxwriter` and `openpyxl`, you need to know either the cell name or range
-or the row and column number to make changes. Given that you know the shape of your DataFrame, and where in the spreadsheet they were written surely there must be a way to know where each element of your frame is in the document...?
+Whilst this is useful, what if you want to add things to ``book.xlsx`` based off of ``f``? With both `xlsxwriter` and `openpyxl`, you need to know either the cell name or range,
+or the row and column number to make changes. 
+
+Given that you know the shape of your DataFrame, and where in the spreadsheet they were written surely there must be a way to know where each element of your frame is in the document...?
 
 This is where xl_link steps in. xl_link provides a subclass of ``DataFrame``, ``XLDataFrame`` where the ``to_excel`` method has been modified to return an ``XLMap`` object:
 
@@ -71,7 +73,7 @@ This is perhaps easier to demonstrate::
 	>>> xlmap
 		<XLMap: index: <XLRange: 'Sheet1'!A2:A11>, columns: <XLRange: 'Sheet1'!B1:C1>, data: <XLRange: 'Sheet1'!B2:C11>>
 
-so xlmap represents a `f` within Sheet1, where the index occupies A2:A11, the columns occupy B1:C1, and the data B2:C11.
+so xlmap represents ``f`` within Sheet1, where the index occupies A2:A11, the columns occupy B1:C1, and the data B2:C11.
 
 
 ``index``, ``columns`` and ``data`` are all attributes of xlmap, and can be accessed directly. 
@@ -110,7 +112,7 @@ When looking through the documentation for your excel engine, knowing how to acc
 
 A pandas ``ExcelWriter`` can be passed as the first argument to ``XLDataFrame.to_excel``, or if a path is provided, internally, a writer is created, corresponding to the filename and engine.
 
-``XLMap`` keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet**s**!) e.g. with xlmap from above::
+``XLMap`` keeps ahold of a reference to the writer used to create itself, and also the sheet it was written to (Note this is a single sheet, not the same as sheet **s** !) e.g. with xlmap from above::
 
 	>>> xlmap.writer
 		<pandas.io.excel._XlsxWriter at 0x283db2cccc0>
@@ -165,34 +167,34 @@ Creates:
 
 The first parameter is the chart type, all chart types for each engine should be supported i.e.:
 
-xlsxwriter:
+**xlsxwriter** :
 
-    area
-    bar
-    column
-    line
-    pie
-    doughnut
-    scatter
-    stock
-    radar
+    * area
+    * bar
+    * column
+    * line
+    * pie
+    * doughnut
+    * scatter
+    * stock
+    * radar
 
 check out their chart docs here: http://xlsxwriter.readthedocs.io/chart.html
 
-openpyxl:
+**openpyxl** :
 
 	
 
-    Area Charts
-    Bar and Column Charts
-    Bubble Charts
-    Line Charts
-    Scatter Charts
-    Pie Charts
-    Doughnut Charts
-    Radar Charts
-    Stock Charts
-    Surface charts
+    * Area Charts
+    * Bar and Column Charts
+    * Bubble Charts
+    * Line Charts
+    * Scatter Charts
+    * Pie Charts
+    * Doughnut Charts
+    * Radar Charts
+    * Stock Charts
+    * Surface charts
 
 check out their chart docs here: https://openpyxl.readthedocs.io/en/default/charts/introduction.html
 
@@ -201,7 +203,9 @@ chart subtypes are also supported, just pass the ``subtype`` keyword parameter t
 Other parameters you may want to use are:
 
 **values** - in all charts is the dependent variable (e.g. y)
+
 **categories** - for most charts this is used to categorise values data, but can also be used as x values (e.g. in scatter), multiple series can be under the same category.
+
 **names** - these are used to label each series.
 
 

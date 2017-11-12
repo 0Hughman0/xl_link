@@ -17,15 +17,11 @@ Perhaps more usefully, xlmaps offer a wrapper around excel engines (currently su
 Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
 
     >>> writer = pd.ExcelWriter("Example.xlsx", engine='xlsxwriter')
-    >>> f1 = XLDataFrame(columns=('X', 'Y1', 'Y2'),
-                         data={'X': range(10),
-                               'Y1': list(random.randrange(0, 10) for _ in range(10)),
+    >>> f = XLDataFrame(data={'Y1': list(random.randrange(0, 10) for _ in range(10)),
                                'Y2': list(random.randrange(0, 10) for _ in range(10))})
-    >>> f1.set_index('X', inplace=True)
-    >>>
     >>> xlmap1 = f1.to_excel(writer, sheet_name='scatter')
     >>> scatter_chart = xlmap1.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
-    >>> xlmap1.sheet.insert_chart(xlmap1.columns[-1].translate(0, 1).cell, scatter_chart) # Puts at top of first empty col
+    >>> xlmap1.sheet.insert_chart('D1', scatter_chart) # Puts at top of first empty col
     >>> writer.save()
 
 Which produces this chart:
@@ -40,9 +36,7 @@ is as easy as:
 
     Setup
 
-    >>> writer = pd.ExcelWriter("Comparison.xlsx", engine='xlsxwriter')
-    >>> calories_per_meal = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
-                                       index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+    >>> f = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                                        data={'Mon': (15, 20, 12, 3),
                                              'Tues': (5, 16, 3, 0),
                                              'Weds': (3, 22, 2, 8),
@@ -50,20 +44,21 @@ is as easy as:
 
     Create chart with xl_link
 
-    >>> xlmap = calories_per_meal.to_excel(writer, sheet_name="XLLinked")
+    >>> xlmap = f.to_excel('Compare.xlsx', sheet_name="XLLinked", engine='xlsxwriter')
     >>> xl_linked_chart = xlmap.create_chart('column', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories")
-    >>> xlmap.sheet.insert_chart('A1', xl_linked_chart)
+    >>> xlmap.sheet.add_chart(xl_linked_chart, 'F1')
     >>> xlmap.writer.save()
 
 Creating the same chart without xl_link looks something like:
 
-    >>> calories_per_meal.to_excel(writer, sheet_name="Without")
+    >>> writer = pd.ExcelWriter('Compare.xlsx', engine='xlsxwriter')
+	>>> f.to_excel(writer, sheet_name="Without")
     >>> without_sheet = writer.sheets["Without"]
     >>> without_chart = writer.book.add_chart({"type": "column"})
-    >>> for col_num in range(1, len(calories_per_meal.index) + 1):
+    >>> for col_num in range(1, len(f.index) + 1):
     >>>     without_chart.add_series({'name': ["Without", col_num, 0],
-    >>>                               'categories': ["Without", 0, 1, 0, 4],
-    >>>                               'values': ["Without", col_num, 1, col_num, 4]})
+                                      'categories': ["Without", 0, 1, 0, 4],
+                                      'values': ["Without", col_num, 1, col_num, 4]})
     >>> without_chart.set_x_axis({'name': 'Meal'})
     >>> without_chart.set_y_axis({'name': 'Calories'})
     >>> without_chart.title = "Without xl_link"
@@ -80,8 +75,7 @@ An XLMap object represents a DataFrame, frozen as it was written to excel, but c
 
 Let's look at XLMap with a more detailed example:
 
-    >>> f = XLDataFrame(columns=("Mon", "Tues", "Weds", "Thur"),
-                         index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
+    >>> f = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                          data={'Mon': (15, 20, 12, 3),
                                'Tues': (5, 16, 3, 0),
                                'Weds': (3, 22, 2, 8),
@@ -100,12 +94,6 @@ Let's look at XLMap with a more detailed example:
         <XLRange: 'Sheet1'!A2:A5>
     >>> xlmap.columns
         <XLRange: 'Sheet1'!B1:E1>
-
-If you were to open t.xlsx you would find that the ranges described by xlmap line up perfectly with where f was written. And, write_frame is smart, you can use all of the parameters you normally use with DataFrame.to_excel, just pass them as a dict to write_frame:
-
-    >>> xlmap = xl_link.write_frame(f, "t.xlsx", {'sheet_name': 'Demo Sheet', 'startrow': 7})
-    >>> xlmap
-        <XLMap: index: <XLRange: 'Demo Sheet'!A9:A12>, columns: <XLRange: 'Demo Sheet'!B8:E8>, data: <XLRange: 'Demo Sheet'!B9:E12>>
 
 Here are some more indexing examples:
 
