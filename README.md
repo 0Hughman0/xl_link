@@ -52,4 +52,6 @@ is as easy as:
     >>> xlmap.sheet.add_chart(xl_linked_chart, 'F1')
     >>> xlmap.writer.save()
 
+Check out the examples folder for more examples!
+
 This package uses the utility functions from XlsxWriter under the BSD license found here: https://github.com/jmcnamara/XlsxWriter

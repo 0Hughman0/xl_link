@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import importlib
 from xl_link.xl_types import to_series
+from warnings import warn
 
 from distutils.version import StrictVersion
 
@@ -155,7 +156,6 @@ class OpenPyXLChartWrapper(AbstractChartWrapper):
 
     def __init__(self, book, type_, subtype, openpyxl):
         super().__init__(book, type_, subtype, openpyxl)
-
         self.chart = getattr(openpyxl.chart, type_to_openpyxl_chart_name(type_))()
         if subtype:
             self.chart.type = subtype
@@ -167,7 +167,11 @@ class OpenPyXLChartWrapper(AbstractChartWrapper):
             series = Series(values.frange, title=name)
             self.chart.append(series)
         elif self.type_ in SINGLE_CATEGORY_CHARTS:
-            values.start.row += -1 # To include top cell as name
+            if values.is_col:
+                values.start.row += -1 # To include top cell as name
+            else: # is_row
+                warn("Appears you're using rows as values with openpyxl, support for this is a little temperamental, you have been warned!")
+                values.start.col += -1
             self.chart.add_data(values.frange, titles_from_data=True)
             self.chart.set_categories(categories.frange)
         else:
@@ -201,7 +205,7 @@ class OpenPyXLChartWrapper(AbstractChartWrapper):
 def create_chart(workbook, engine, type_, values, categories, names, subtype=None,
                  title=None, x_axis_name=None, y_axis_name=None):
     """
-    Create a chart object corresponding to given engine, within sheet.
+    Create a chart object corresponding to given engine, within workbook.
 
     Parameters
     ----------

@@ -66,3 +66,4 @@ setup.py
 /build
 /dist
 /xl_link.egg-info
+README.rst
