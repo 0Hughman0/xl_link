@@ -16,41 +16,48 @@ Additionally XLMaps offer a wrapper around excel engines (currently supporting x
 
 ## Chart demo
 
-Here's a teaser of what xl_link can do when combined with xlsx writer (for example):
-
-    >>> from xl_link import XLDataFrame
-	>>> import numpy as np
-	>>> f = XLDataFrame(data={'Y1': np.random.randn(30),
-                              'Y2': np.random.randn(30)})
-    >>> xlmap = f.to_excel('Chart Demo.xlsx', sheet_name='scatter')
-    >>> scatter_chart = xlmap.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
-    >>> xlmap.sheet.insert_chart('D1', scatter_chart)
-    >>> xlmap.writer.save()
-
-Which produces this chart:
-
-![scatter chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/ScatterExample.PNG)
-
-Creating a complex chart like this:
-
-![multi bar chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/BarExample.png)
-
-is as easy as:
+creating a complex chart is as easy as:
 
     Setup
 
     >>> f = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
-                                       data={'Mon': (15, 20, 12, 3),
-                                             'Tues': (5, 16, 3, 0),
-                                             'Weds': (3, 22, 2, 8),
-                                             'Thur': (6, 7, 1, 9)})
+                        data={'Mon': (15, 20, 12, 3),
+                              'Tues': (5, 16, 3, 0),
+                              'Weds': (3, 22, 2, 8),
+                              'Thur': (6, 7, 1, 9)})
 
     Create chart with xl_link
 
-    >>> xlmap = f.to_excel('Compare.xlsx', sheet_name="XLLinked", engine='openpyxl')
+    >>> xlmap = f.to_excel('Chart.xlsx', sheet_name="XLLinked", engine='openpyxl')
     >>> xl_linked_chart = xlmap.create_chart('bar', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories", subtype='col')
     >>> xlmap.sheet.add_chart(xl_linked_chart, 'F1')
     >>> xlmap.writer.save()
+
+Producing this chart:
+
+![multi bar chart](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/BarExample.png)
+
+
+## Formatting demo
+
+Applying conditional formatting to a table is as easy as:
+
+    Setup
+    >>> import numpy as np
+    >>> xy_data = XLDataFrame(data={'Y1': np.random.rand(10) * 10,
+                                    'Y2': np.random.rand(10) * 10})
+
+    Create table with conditional formatting
+
+    >>> xlmap = xy_data.to_excel("ConditionalFormatting.xlsx", engine='xlsxwriter')
+    >>> xlmap.sheet.conditional_format(xlmap.data.range, # position of data within spreadsheet
+                                       {'type': '3_color_scale',
+                                        'min_type': 'num', 'min_value': xlmap.f.min().min(), 'min_color': 'green',
+                                        'mid_type': 'num', 'mid_value': xlmap.f.mean().mean(), 'mid_color': 'yellow',
+                                        'max_type': 'num', 'max_value': xlmap.f.max().max(), 'max_color': 'red'})
+    >>> xlmap.writer.save()
+
+![conditional formatting](https://raw.githubusercontent.com/0Hughman0/xl_link/master/examples/ConditionalFormattingExample.png)
 
 Check out the examples folder for more examples!
 

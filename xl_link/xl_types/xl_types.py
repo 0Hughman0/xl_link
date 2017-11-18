@@ -485,6 +485,8 @@ class XLRange:
         Notes
         -----
         int, single slice and boolean indexers can only be used on one dimensional XLRanges.
+
+        Will always return an XLRange unless a scalar key is used.
         """
         if is_int_type(key):
 
@@ -517,8 +519,6 @@ class XLRange:
 
             start = min(true_positions)
             stop = max(true_positions)
-            print(start)
-            print(stop)
 
             step_is_1 = ((stop - start) + 1) / len(true_positions) == 1
 

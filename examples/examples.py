@@ -1,12 +1,16 @@
+import pandas as pd
+import numpy as np
+
 import sys
 
 sys.path.append('..')
-
-import pandas as pd
 from xl_link import XLDataFrame
-import numpy as np
 
-# Example data
+"""
+Create example data
+===================
+"""
+
 cat_data = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                        data={'Mon': (15, 20, 12, 3),
                                        'Tues': (5, 16, 3, 0),
@@ -16,11 +20,17 @@ cat_data = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
 xy_data = XLDataFrame(data={'Y1': np.random.rand(10) * 10,
                             'Y2': np.random.rand(10) * 10})
 
-#### Using openpyxl #####################################################################################################
+"""
+Using openpyxl
+==============
+"""
 
 writer = pd.ExcelWriter("OpenPyXLExamples.xlsx", engine="openpyxl") # Allows multiple sheets in same .xlsx file
 
-### Bar Charts #########################################################################################################
+"""
+Bar Charts
+----------
+"""
 
 xlmap = cat_data.to_excel(writer, sheet_name='Bar')
 chart = xlmap.create_chart('bar',
@@ -30,36 +40,68 @@ chart = xlmap.create_chart('bar',
 # Insert right of last column -> last column: columns[-1], one to right: .trans(0, 1)
 xlmap.sheet.add_chart(chart, xlmap.columns[-1].trans(0, 1).cell)
 
-### Simple Scatter #####################################################################################################
+"""
+Simple Scatter
+--------------
+"""
 
 xlmap = xy_data.to_excel(writer, sheet_name='Scatter')
 scatter_chart = xlmap.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
 xlmap.sheet.add_chart(scatter_chart, xlmap.columns[-1].trans(0, 1).cell)
 
-### Highlight values ####################################################################################################
+"""
+Highlight values
+----------------
+"""
 
 from openpyxl.styles import Font
-from openpyxl.styles.colors import RED
+from openpyxl.styles.colors import RED, GREEN
 
 xlmap = xy_data.to_excel(writer, sheet_name="Highlighted")
 
-# Iterate through each row in xlsx sheet, and written frame f in parallel
-for xlrow, frow in zip(xlmap.data.iterrows(), xlmap.f.iterrows()):
-    i, row = frow
-    for xlcell, val in zip(xlrow, row):
-        if val > 5:
-            xlmap.sheet[xlcell.cell].font = Font(color=RED, bold=True)
+max_position = xlmap.f['Y1'].values.argmax()
+min_position = xlmap.f['Y2'].values.argmin()
 
-# insert 2 below bottom of table
-xlmap.sheet[xlmap.index[-1].trans(2, 0).cell].value = "Values above 5 highlighted"
+xlmap.sheet[xlmap['Y1'][max_position].cell].font = Font(color=GREEN, bold=True)
+xlmap.sheet[xlmap['Y2'][min_position].cell].font = Font(color=RED, bold=True)
+
+xlmap.sheet[xlmap['Y1'][-1].trans(2, 0).cell].value = "Max highlighted"
+xlmap.sheet[xlmap['Y2'][-1].trans(2, 0).cell].value = "Min highlighted"
+
+"""
+Conditional formatting
+----------------------
+"""
+
+from openpyxl.formatting.rule import ColorScaleRule
+from openpyxl.styles.colors import RED, YELLOW, GREEN
+
+xlmap = xy_data.to_excel(writer, sheet_name="Conditional Formatting")
+
+rule = ColorScaleRule(start_type='num', start_value=xlmap.f.min().min(), start_color=GREEN,
+                      mid_type='num', mid_value=xlmap.f.mean().mean(), mid_color=YELLOW,
+                      end_type='num', end_value=xlmap.f.max().max(), end_color=RED)
+
+xlmap.sheet.conditional_formatting.add(xlmap.data.range, rule)
+
+"""
+Save
+----
+"""
 
 writer.save()
 
-#### Using xlsxwriter ##################################################################################################
 
+"""
+Using xlsxwriter
+================
+"""
 writer = pd.ExcelWriter("XlsxWriterExamples.xlsx", engine='xlsxwriter') # Allows multiple sheets in same .xlsx file
 
-### Bar Charts #########################################################################################################
+"""
+Bar Charts
+----------
+"""
 
 xlmap = cat_data.to_excel(writer, sheet_name="Bar")
 xl_linked_chart = xlmap.create_chart('column', title="Bar Chart", x_axis_name="Meal", y_axis_name="Calories")
@@ -67,13 +109,19 @@ xl_linked_chart = xlmap.create_chart('column', title="Bar Chart", x_axis_name="M
 right_of_table = xlmap.columns[-1].trans(0, 1).cell
 xlmap.sheet.insert_chart(right_of_table, xl_linked_chart)
 
-### Simple Scatter #####################################################################################################
+"""
+Simple Scatter
+--------------
+"""
 
 xlmap = xy_data.to_excel(writer, sheet_name='Scatter')
 scatter_chart = xlmap.create_chart('scatter', x_axis_name='x', y_axis_name='y', title='Scatter Example')
 xlmap.sheet.insert_chart(xlmap.columns[-1].trans(0, 1).cell, scatter_chart)
 
-### Highlight values ####################################################################################################
+"""
+Highlight values
+----------------
+"""
 
 xlmap = xy_data.to_excel(writer, sheet_name="Highlighted")
 
@@ -83,14 +131,29 @@ for xlrow, frow in zip(xlmap.data.iterrows(), xlmap.f.iterrows()):
     i, row = frow
     for xlcell, val in zip(xlrow, row):
         if val > 5:
+            # with xlsx writer you have to write a value at the same time as formatting
             xlmap.sheet.write(xlcell.cell, val, highlight)
 
 # insert 2 below bottom of table
 xlmap.sheet.write(xlmap.index[-1].trans(2, 0).cell, "Values above 5 highlighted")
 
-writer.save()
+"""
+Conditional formatting
+----------------------
+"""
 
-#### Use with formulas #################################################################################################
+xlmap = xy_data.to_excel(writer, sheet_name="Conditional Formatting")
+
+xlmap.sheet.conditional_format(xlmap.data.range,
+                               {'type': '3_color_scale',
+                                'min_type': 'num', 'min_value': xlmap.f.min().min(), 'min_color': 'green',
+                                'mid_type': 'num', 'mid_value': xlmap.f.mean().mean(), 'mid_color': 'yellow',
+                                'max_type': 'num', 'max_value': xlmap.f.max().max(), 'max_color': 'red'})
+
+"""
+Use with formulas
+-----------------
+"""
 
 xlmap = cat_data.to_excel("FormulaExamples.xlsx", engine='xlsxwriter')
 
@@ -104,11 +167,23 @@ for col in xlmap.f.columns:
     xlmap.sheet.write(sum_cell.cell, "=SUM({})".format(col_range.frange))
     xlmap.sheet.write(stddev_cell.cell, "=STDEV({})".format(col_range.frange))
 
+"""
+Save
+----
+"""
+
 xlmap.writer.save()
 
-#### Use of chart_wrapper.create_chart #################################################################################
 
-### Chart not using columns ############################################################################################
+"""
+Use of chart_wrapper.create_chart
+=================================
+"""
+
+"""
+Chart not using columns
+-----------------------
+"""
 
 from xl_link.chart_wrapper import create_chart
 
@@ -124,7 +199,10 @@ chart1 = create_chart(writer.book, writer.engine, 'column', values, categories, 
 
 xlmap.sheet.insert_chart(xlmap.columns.stop.trans(0, 1).cell, chart1)
 
-### 2 DataFrames, one chart ############################################################################################
+"""
+2 DataFrames, one chart
+-----------------------
+"""
 
 xy_data2 = xy_data.apply(lambda x: x * 2)
 
@@ -137,5 +215,10 @@ chart2 = create_chart(writer.book, writer.engine, 'scatter',
                      ('df1-Y1', 'df2-Y1')) # Names
 
 xlmap1.sheet.insert_chart(xlmap2.columns[-1].trans(0, 1).cell, chart2)
+
+"""
+Save
+----
+"""
 
 writer.save()
