@@ -1,0 +1,979 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API &#8212; XLlink 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="XLMap" href="xl_map.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-xl_link">
+<span id="xl-link"></span><h2>xl_link<a class="headerlink" href="#module-xl_link" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="xl_link.XLDataFrame">
+<em class="property">class </em><code class="descclassname">xl_link.</code><code class="descname">XLDataFrame</code><span class="sig-paren">(</span><em>data=None</em>, <em>index=None</em>, <em>columns=None</em>, <em>dtype=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monkeypatched DataFrame modified by xl_link!</p>
+<ul class="simple">
+<li>to_excel modified to return an XLMap.</li>
+<li>XLDataFrame._constructor set to XLDataFrame -&gt; stops reverting to normal DataFrame</li>
+</ul>
+<p class="rubric">Notes</p>
+<p>Conversions from this DataFrame to Series or Panels will return regular Panels and Series,
+which will convert back into regular DataFrame’s upon expanding/ reducing dimensions.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-class docutils literal"><span class="pre">Pandas.DataFrame</span></code></p>
+</div>
+<dl class="method">
+<dt id="xl_link.XLDataFrame.to_excel">
+<code class="descname">to_excel</code><span class="sig-paren">(</span><em>excel_writer</em>, <em>sheet_name='Sheet1'</em>, <em>na_rep=''</em>, <em>float_format=None</em>, <em>columns=None</em>, <em>header=True</em>, <em>index=True</em>, <em>index_label=None</em>, <em>startrow=0</em>, <em>startcol=0</em>, <em>engine=None</em>, <em>merge_cells=True</em>, <em>encoding=None</em>, <em>inf_rep='inf'</em>, <em>verbose=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLDataFrame.to_excel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monkeypatched DataFrame.to_excel by xl_link!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of frame as it appears in excel (see XLMap for details)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.XLMap" title="xl_link.XLMap">XLMap</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-meth docutils literal"><span class="pre">Pandas.DataFrame.to_excel()</span></code></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When providing a path as excel_writer, default engine used is ‘xlsxwriter’, as xlsxwriter workbooks can only be
+saved once, xl_link suppresses calling <cite>excel_writer.save()</cite>, as a result, <cite>xlmap.writer.save()</cite> should be
+called once no further changes are to be made to the spreadsheet.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="xl_link.XLMap">
+<em class="property">class </em><code class="descclassname">xl_link.</code><code class="descname">XLMap</code><span class="sig-paren">(</span><em>data_range</em>, <em>index_range</em>, <em>column_range</em>, <em>f</em>, <em>writer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object that maps a Pandas DataFrame to it’s positions on an excel spreadsheet.</p>
+<p>Provides access to basic pandas indexers - __getitem__, loc, iloc, ix, iat and at.
+These indexers are modified such that they return the cell/ range of the result.</p>
+<p>The idea is should make using the data in spreadsheet easy to access, by using Pandas indexing syntax.
+For example can be used to create charts more easily (see example below).</p>
+<p class="rubric">Notes</p>
+<p>Recommended to not be created directly, instead via, XLDataFrame.to_excel.</p>
+<p>XLMap can only go ‘one level deep’ in terms of indexing, because each indexer always returns either an XLCell,
+or an XLRange. The only workaround is to reduce the size of your DataFrame BEFORE you call write_frame.
+This limitation drastically simplifies the implementation. Examples of what WON’T WORK:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Mon&#39;</span><span class="p">:</span><span class="s1">&#39;Tues&#39;</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">index</span>
+<span class="go">    AttributeError: &#39;XLRange&#39; object has no attribute &#39;index&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="s1">&#39;Mon&#39;</span><span class="p">:</span><span class="s1">&#39;Tues&#39;</span><span class="p">]</span> <span class="c1"># Doesn&#39;t work because index is not a Pandas Index, but an XLRange.</span>
+<span class="go">    TypeError: unsupported operand type(s) for -: &#39;str&#39; and &#39;int&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>index_range</strong><strong>, </strong><strong>column_range</strong> (<em>data_range</em><em>,</em>) – that represents the region the DataFrame’s data sits in.</li>
+<li><strong>f</strong> (<em>DataFrame</em>) – that has been written to excel.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="xl_link.XLMap.index">
+<code class="descname">index</code><a class="headerlink" href="#xl_link.XLMap.index" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the index column occupies</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.columns">
+<code class="descname">columns</code><a class="headerlink" href="#xl_link.XLMap.columns" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the frame columns occupy</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.data">
+<code class="descname">data</code><a class="headerlink" href="#xl_link.XLMap.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLRange</em> – range that the frame data occupies</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.writer">
+<code class="descname">writer</code><a class="headerlink" href="#xl_link.XLMap.writer" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Pandas.ExcelWriter</em> – writer used to create spreadsheet</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.XLMap.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>object</em> – sheet object corresponding to sheet the frame was written to, handy if you want insert a chart into the same sheet</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">calories_per_meal</span> <span class="o">=</span> <span class="n">XLDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Meal&quot;</span><span class="p">,</span> <span class="s2">&quot;Mon&quot;</span><span class="p">,</span> <span class="s2">&quot;Tues&quot;</span><span class="p">,</span> <span class="s2">&quot;Weds&quot;</span><span class="p">,</span> <span class="s2">&quot;Thur&quot;</span><span class="p">),</span>
+<span class="go">                                     data={&#39;Meal&#39;: (&#39;Breakfast&#39;, &#39;Lunch&#39;, &#39;Dinner&#39;, &#39;Midnight Snack&#39;),</span>
+<span class="go">                                           &#39;Mon&#39;: (15, 20, 12, 3),</span>
+<span class="go">                                           &#39;Tues&#39;: (5, 16, 3, 0),</span>
+<span class="go">                                           &#39;Weds&#39;: (3, 22, 2, 8),</span>
+<span class="go">                                           &#39;Thur&#39;: (6, 7, 1, 9)})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calories_per_meal</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Meal&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Write to excel</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="s2">&quot;Example.xlsx&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span> <span class="o">=</span> <span class="n">calories_per_meal</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;XLLinked&quot;</span><span class="p">)</span> <span class="c1"># returns the XLMap</span>
+</pre></div>
+</div>
+<p>Create chart with XLLink</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">workbook</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">book</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xl_linked_sheet</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="s2">&quot;XLLinked&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xl_linked_chart</span> <span class="o">=</span> <span class="n">workbook</span><span class="o">.</span><span class="n">add_chart</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;column&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">calories_per_meal</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">xl_linked_chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+<span class="go">                                    &#39;categories&#39;: proxy.columns.frange,</span>
+<span class="go">                                    &#39;values&#39;: proxy.loc[time].frange})</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="xl_link.XLMap.at">
+<code class="descname">at</code><a class="headerlink" href="#xl_link.XLMap.at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for DataFrame.at, see Pandas DataFrame at help for behaviour.</p>
+<p>Will return location result rather than underlying data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">location corresponding to position value within spreadsheet.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s2">&quot;Mon&quot;</span><span class="p">,</span> <span class="s2">&quot;Lunch&quot;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: C3&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.XLMap.create_chart">
+<code class="descname">create_chart</code><span class="sig-paren">(</span><em>type_='scatter'</em>, <em>values=None</em>, <em>categories=None</em>, <em>names=None</em>, <em>subtype=None</em>, <em>title=None</em>, <em>x_axis_name=None</em>, <em>y_axis_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.XLMap.create_chart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create excel chart object based off of data within the Frame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>type</strong> (<em>str</em>) – Type of chart to create.</li>
+<li><strong>values</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – label or list of labels to corresponding to column to use as values for each series in chart.
+Default all columns.</li>
+<li><strong>categories</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – label or list of labels to corresponding to column to use as categories for each series in chart.
+Default, use index for ‘scatter’ or None for everything else.</li>
+<li><strong>names</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em>) – str or list of strs to corresponding to names for each series in chart.
+Default, column names corresponding to values.</li>
+<li><strong>subtype</strong> (<em>str</em>) – subtype of type, only available for some chart types e.g. bar, see Excel writing package for details</li>
+<li><strong>title</strong> (<em>str</em>) – chart title</li>
+<li><strong>x_axis_name</strong> (<em>str</em>) – used as label on x_axis</li>
+<li><strong>y_axis_name</strong> (<em>str</em>) – used as label on y_axis</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Chart object corresponding to the engine selected</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>values, categories parameters can only correspond to columns.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.df">
+<code class="descname">df</code><a class="headerlink" href="#xl_link.XLMap.df" title="Permalink to this definition">¶</a></dt>
+<dd><p>for convenience provides read-only access to the DataFrame originally written to excel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.f">
+<code class="descname">f</code><a class="headerlink" href="#xl_link.XLMap.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>for convenience provides read-only access to the DataFrame originally written to excel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.iat">
+<code class="descname">iat</code><a class="headerlink" href="#xl_link.XLMap.iat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for DataFrame.iat, see Pandas DataFrame iat help for behaviour.</p>
+<p>Will return location result rather than underlying data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">location corresponding to position value within spreadsheet.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="go">    &lt;XLCell C3&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.iloc">
+<code class="descname">iloc</code><a class="headerlink" href="#xl_link.XLMap.iloc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for DataFrame.iloc, see Pandas DataFrame iloc help for behaviour.</p>
+<p>Will return location result rather than underlying data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">    &lt;XLRange: A2:D2&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.ix">
+<code class="descname">ix</code><a class="headerlink" href="#xl_link.XLMap.ix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for DataFrame.ix, see Pandas DataFrame ix help for behaviour. (That said this is deprecated since 0.20!)</p>
+<p>Will return location result rather than underlying data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">    &lt;XLRange A2:D2&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.XLMap.loc">
+<code class="descname">loc</code><a class="headerlink" href="#xl_link.XLMap.loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for DataFrame.loc, see Pandas DataFrame loc help for behaviour.</p>
+<p>Will return location result rather than underlying data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">corresponding to position of DataFrame, Series or Scalar found within spreadsheet.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a> or <a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Tues&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLRange: A2:D2&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="xl_link.write_frame">
+<code class="descclassname">xl_link.</code><code class="descname">write_frame</code><span class="sig-paren">(</span><em>f</em>, <em>excel_writer</em>, <em>to_excel_args=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.write_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a Pandas DataFrame to excel by calling to_excel, returning an XLMap, that can be used to determine
+the position of parts of f, using pandas indexing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f</strong> (<em>DataFrame</em>) – Frame to write to excel</li>
+<li><strong>excel_writer</strong> (<em>str</em><em> or </em><em>ExcelWriter</em>) – Path or existing Excel Writer to use to write frame</li>
+<li><strong>to_excel_args</strong> (<em>dict</em>) – Additional arguments to pass to DataFrame.to_excel, see docs for DataFrame.to_excel</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Mapping that corresponds to the position in the spreadsheet that frame was written to.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.XLMap" title="xl_link.XLMap">XLMap</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xl_link.get_xl_ranges">
+<code class="descclassname">xl_link.</code><code class="descname">get_xl_ranges</code><span class="sig-paren">(</span><em>frame_index</em>, <em>frame_columns</em>, <em>sheet_name='Sheet1'</em>, <em>columns=None</em>, <em>header=True</em>, <em>index=True</em>, <em>index_label=None</em>, <em>startrow=0</em>, <em>startcol=0</em>, <em>merge_cells=True</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.get_xl_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deduces location of data_range, index_range and col_range within excel spreadsheet, given the parameters provided.</p>
+<p>Does not require an actual DataFrame, which could be useful!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>frame_index</strong> (<em>Pandas Index</em><em> or </em><em>Array-like</em>) – to determine location of index within spreadsheet.</li>
+<li><strong>frame_columns</strong> (<em>Pandas Index</em><em> or </em><em>Array-like</em>) – used to determine location of column within spreadsheet.</li>
+<li><strong>excel_writer</strong> (<em>string</em><em> or </em><em>ExcelWriter</em>) – </li>
+<li><strong>sheet_name</strong> (<em>str</em>) – default ‘Sheet1’, Name of sheet which will contain DataFrame</li>
+<li><strong>columns</strong> (<em>sequence</em>) – optional, Columns to write</li>
+<li><strong>header</strong> (<em>bool</em><em> or </em><em>list of strings</em><em>,</em>) – default True Write out the column names. If a list of strings is given it is assumed to be aliases for the column names</li>
+<li><strong>index</strong> (<em>bool</em>) – default True. Write row names (index)</li>
+<li><strong>index_label</strong> (<em>str</em><em> or </em><em>sequence</em>) – default None. Column label for index column(s) if desired. If None is given, and header and index are True, then the index names are used. A sequence should be given if the
+DataFrame uses MultiIndex.</li>
+<li><strong>startrow</strong> (<em>int</em>) – upper left cell row to dump data frame</li>
+<li><strong>startcol</strong> (<em>int</em>) – upper left cell column to dump data frame</li>
+<li><strong>merge_cells</strong> (<em>bool</em>) – default True. Write MultiIndex and Hierarchical Rows as merged cells.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>data_range, index_range, col_range</strong> (<em>XLRange</em>) – Each range represents where the data, index and columns can be found on the spreadsheet</li>
+<li><strong>empty_f</strong> (<em>DatFrame</em>) – an empty DataFrame with matching Indices.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-xl_link.xl_types">
+<span id="xl-types-py"></span><h2>xl_types.py<a class="headerlink" href="#module-xl_link.xl_types" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="xl_link.xl_types.XLRange">
+<em class="property">class </em><code class="descclassname">xl_link.xl_types.</code><code class="descname">XLRange</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a range in an Excel spreadsheet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>start</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to start cell</li>
+<li><strong>stop</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – corresponding to stop cell</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.start">
+<code class="descname">start</code><a class="headerlink" href="#xl_link.xl_types.XLRange.start" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLCell</em> – corresponding to start cell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.stop">
+<code class="descname">stop</code><a class="headerlink" href="#xl_link.xl_types.XLRange.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>XLCell</em> – corresponding to stop cell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.xl_types.XLRange.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – name of sheet range exists in</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<p>Using __init__</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;B7&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">XLRange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+<span class="go">    &lt;XLRange: A1:B7&gt;</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Upon initialisation, if start and stop are not from the same sheet, an assertion error is raised.</p>
+<p>start and stop are attributes that can be accessed and modified directly.</p>
+<p>All methods are designed to return new objects, preserving the state of self.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLRange.from_range" title="xl_link.xl_types.XLRange.from_range"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_range</span></code></a>, <a class="reference internal" href="#xl_link.xl_types.XLRange.from_frange" title="xl_link.xl_types.XLRange.from_frange"><code class="xref py py-class docutils literal"><span class="pre">XLRange.from_frange</span></code></a></p>
+</div>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.frange">
+<code class="descname">frange</code><a class="headerlink" href="#xl_link.xl_types.XLRange.frange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the Excel range this object represents, for use in excel formulas</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">representing this range in excel notation for use in excel formulas (e.g. “’{sheet}’!{start}:{stop}”</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;B7&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">range</span> <span class="o">=</span> <span class="n">XLRange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">range</span><span class="o">.</span><span class="n">frange</span>
+<span class="go">    &quot;&#39;Sheet1&#39;!A1:B7&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="xl_link.xl_types.XLRange.from_frange">
+<em class="property">classmethod </em><code class="descname">from_frange</code><span class="sig-paren">(</span><em>frange</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.from_frange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frange</strong> (<em>str</em>) – str in excel formula notation (e.g. “‘Sheet1’!A1:B20”), representing excel range.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">initialised XLRange</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="xl_link.xl_types.XLRange.from_range">
+<em class="property">classmethod </em><code class="descname">from_range</code><span class="sig-paren">(</span><em>range</em>, <em>sheet='Sheet1'</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.from_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>range</strong> (<em>str</em>) – str in excel notation (e.g. ‘A1:B20’), representing excel range.</li>
+<li><strong>sheet</strong> (<em>str</em>) – sheet range belongs to, default=’Sheet1’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">initialised XLRange</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLRange.iterrows">
+<code class="descname">iterrows</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.iterrows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over each row of self, yields each row as XLRange</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body"><em>XLRange</em> – corresponding to current row</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.range">
+<code class="descname">range</code><a class="headerlink" href="#xl_link.xl_types.XLRange.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the Excel range this object represents</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">representing this range in excel notation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;B7&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">range</span> <span class="o">=</span> <span class="n">XLRange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">range</span><span class="o">.</span><span class="n">range</span>
+<span class="go">    &#39;A1:B7&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.rowcol_rowcol">
+<code class="descname">rowcol_rowcol</code><a class="headerlink" href="#xl_link.xl_types.XLRange.rowcol_rowcol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinates of start and stop</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>start.row, stop.col</strong> (<em>tuple</em>) – start position in rows and column num (start.row, start.col)</li>
+<li><strong>stop.row, stop.col</strong> (<em>tuple</em>) – stop position in rows and column num (stop.row, stop.col)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLRange.shape">
+<code class="descname">shape</code><a class="headerlink" href="#xl_link.xl_types.XLRange.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns: representing shape of XLRange in form (height, width)
+:rtype: tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLRange.trans">
+<code class="descname">trans</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.trans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short for XLRange.translate</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLRange.translate" title="xl_link.xl_types.XLRange.translate"><code class="xref py py-meth docutils literal"><span class="pre">XLRange.translate()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLRange.translate">
+<code class="descname">translate</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLRange.translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translates whole range by row, col.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>row</strong> (<em>int</em>) – corresponding to movement in row direction (+ve down the spreadsheet)</li>
+<li><strong>col</strong> (<em>int</em>) – corresponding to movement in col direction (+ve right across the spreadsheet)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new with translation applied</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This moves the whole range, and cannot be used to change the shape of self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="xl_link.xl_types.XLCell">
+<em class="property">class </em><code class="descclassname">xl_link.xl_types.</code><code class="descname">XLCell</code><span class="sig-paren">(</span><em>row</em>, <em>col</em>, <em>sheet='Sheet1'</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents the location of a cell in an Excel spreadsheet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>row</strong> (<em>int</em>) – corresponding to cell row number (0 indexed)</li>
+<li><strong>col</strong> (<em>int</em>) – corresponding to cell col number (0 indexed)</li>
+<li><strong>sheet</strong> (<em>str</em>) – corresponding to the sheet the cell is in, default=’Sheet1’</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.row">
+<code class="descname">row</code><a class="headerlink" href="#xl_link.xl_types.XLCell.row" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – corresponding to cell row number (0 indexed)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.col">
+<code class="descname">col</code><a class="headerlink" href="#xl_link.xl_types.XLCell.col" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – corresponding to cell col number (0 indexed)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#xl_link.xl_types.XLCell.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – corresponding to the sheet the cell is in, default=’Sheet1’</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">XLCell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Accounts&#39;</span><span class="p">)</span>
+<span class="go">    &lt;XLCell: F1&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;F1&#39;</span><span class="p">,</span> <span class="s1">&#39;Accounts&#39;</span><span class="p">)</span>
+<span class="go">    &lt;XLCell: F1&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">XLCell</span><span class="o">.</span><span class="n">from_fcell</span><span class="p">(</span><span class="s2">&quot;&#39;Accounts&#39;!F1&quot;</span><span class="p">)</span>
+<span class="go">    &lt;XLCell: F1&gt;</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>sheet can be set to None if desired, keep in mind it defaults to ‘Sheet1’, mostly for convenience.</p>
+<p>row, col and sheet are attributes that can be accessed and set directly.</p>
+<p>All methods are designed to return new objects, preserving the state of self.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLCell.from_cell" title="xl_link.xl_types.XLCell.from_cell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_cell</span></code></a>, <a class="reference internal" href="#xl_link.xl_types.XLCell.from_fcell" title="xl_link.xl_types.XLCell.from_fcell"><code class="xref py py-class docutils literal"><span class="pre">XLCell.from_fcell</span></code></a></p>
+</div>
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.cell">
+<code class="descname">cell</code><a class="headerlink" href="#xl_link.xl_types.XLCell.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the cell location str.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">cell location in excel notation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cell</span> <span class="o">=</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Accounts&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cell</span><span class="o">.</span><span class="n">cell</span>
+<span class="go">    &#39;F1&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLCell.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.copy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">copy of self</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.fcell">
+<code class="descname">fcell</code><a class="headerlink" href="#xl_link.xl_types.XLCell.fcell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the cell location for use in excel formulas.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">cell location in excel notation, in ‘{sheet}’!{cell} form</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cell</span> <span class="o">=</span> <span class="n">XLCell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Accounts&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cell</span><span class="o">.</span><span class="n">fcell</span>
+<span class="go">    &quot;&#39;Accounts&#39;!F1&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="xl_link.xl_types.XLCell.from_cell">
+<em class="property">classmethod </em><code class="descname">from_cell</code><span class="sig-paren">(</span><em>cell</em>, <em>sheet='Sheet1'</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.from_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell</strong> (<em>str</em>) – cell in excel notation (e.g. ‘A1’), representing cell location.</li>
+<li><strong>sheet</strong> (<a class="reference internal" href="#xl_link.XLMap.sheet" title="xl_link.XLMap.sheet"><em>sheet</em></a>) – sheet cell belongs to, default=’Sheet1’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Initialised XLCell</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="xl_link.xl_types.XLCell.from_fcell">
+<em class="property">classmethod </em><code class="descname">from_fcell</code><span class="sig-paren">(</span><em>fcell</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.from_fcell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fcell</strong> (<em>str</em>) – cell in excel formula notation (e.g. “‘Sheet1’!A1”), representing cell location.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Initialised XLCell</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLCell.range_between">
+<code class="descname">range_between</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.range_between" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get XLRange between this cell and other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell"><em>XLCell</em></a>) – other XLCell that makes up stop of excel range</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">range between this cell and other</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange">XLRange</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stop</span> <span class="o">=</span> <span class="n">XLCell</span><span class="o">.</span><span class="n">from_cell</span><span class="p">(</span><span class="s1">&#39;B7&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">start</span><span class="o">.</span><span class="n">range_between</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+<span class="go">    &lt;XLRange: A1:B7&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="xl_link.xl_types.XLCell.rowcol">
+<code class="descname">rowcol</code><a class="headerlink" href="#xl_link.xl_types.XLCell.rowcol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinates of cell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>row, col</strong> – (row, col) corresponding to location of cell</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tuple(int, int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLCell.trans">
+<code class="descname">trans</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.trans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short for XLCell.translate</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#xl_link.xl_types.XLCell.translate" title="xl_link.xl_types.XLCell.translate"><code class="xref py py-meth docutils literal"><span class="pre">XLCell.translate()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="xl_link.xl_types.XLCell.translate">
+<code class="descname">translate</code><span class="sig-paren">(</span><em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.xl_types.XLCell.translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns new XLCell with translation applied</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>row</strong> (<em>int</em>) – corresponding to movement in row direction (+ve down the spreadsheet)</li>
+<li><strong>col</strong> (<em>int</em>) – corresponding to movement in col direction (+ve right across the spreadsheet)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new cell with translation applied</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#xl_link.xl_types.XLCell" title="xl_link.xl_types.XLCell">XLCell</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-xl_link.chart_wrapper">
+<span id="chart-wrapper-py"></span><h2>chart_wrapper.py<a class="headerlink" href="#module-xl_link.chart_wrapper" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="xl_link.chart_wrapper.create_chart">
+<code class="descclassname">xl_link.chart_wrapper.</code><code class="descname">create_chart</code><span class="sig-paren">(</span><em>workbook</em>, <em>engine</em>, <em>type_</em>, <em>values</em>, <em>categories</em>, <em>names</em>, <em>subtype=None</em>, <em>title=None</em>, <em>x_axis_name=None</em>, <em>y_axis_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.create_chart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a chart object corresponding to given engine, within workbook.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workbook</strong> (<em>object</em>) – to insert chart into, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
+<li><strong>engine</strong> (<em>str</em>) – representing engine to use, either XlsxWriter.Workbooks or openpyxl Workbooks.</li>
+<li><strong>type</strong> (<em>str</em>) – representing chart type, see engine docs for options e.g. ‘line’.</li>
+<li><strong>values</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as values for each series/ data set (Excel equivalent to y data).</li>
+<li><strong>categories</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a><em> or </em><em>sequence of XLRanges</em>) – use as categories for each series/ data set (Excel equivalent to x data).</li>
+<li><strong>names</strong> (<em>str/ sequence of str</em>) – use as name for each series/ data set (Excel uses this to label each dataset).</li>
+<li><strong>subtype</strong> (<em>str</em>) – representing chart subtype, see engine docs for details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>chart</strong> – populated chart object corresponding to engine’s chart type.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="xl_link.chart_wrapper.AbstractChartWrapper">
+<em class="property">class </em><code class="descclassname">xl_link.chart_wrapper.</code><code class="descname">AbstractChartWrapper</code><span class="sig-paren">(</span><em>book</em>, <em>type_</em>, <em>subtype=None</em>, <em>engine=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.AbstractChartWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps around excel writer module, for use by create_chart.</p>
+<dl class="method">
+<dt id="xl_link.chart_wrapper.AbstractChartWrapper.add_series">
+<code class="descname">add_series</code><span class="sig-paren">(</span><em>name</em>, <em>values</em>, <em>categories=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xl_link.chart_wrapper.AbstractChartWrapper.add_series" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract: should add a series to chart.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – representing the name of the series</li>
+<li><strong>values</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a>) – represending values of series</li>
+<li><strong>categories</strong> (<a class="reference internal" href="#xl_link.xl_types.XLRange" title="xl_link.xl_types.XLRange"><em>XLRange</em></a>) – representing values of categories</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">XLlink</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_map.html">XLMap</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link">xl_link</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link.xl_types">xl_types.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-xl_link.chart_wrapper">chart_wrapper.py</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="xl_map.html" title="previous chapter">XLMap</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Hugh Ramsden.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,176 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>XLMap &#8212; XLlink 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="XLRange and XLCell" href="xl_types.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="xlmap">
+<h1>XLMap<a class="headerlink" href="#xlmap" title="Permalink to this headline">¶</a></h1>
+<p>An XLMap object represents a DataFrame, frozen as it was written to excel, but crucially, it knows the location of every cell and index of f within the spreadsheet.</p>
+<p>Let’s look at XLMap with a more detailed example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">XLDataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Breakfast&#39;</span><span class="p">,</span> <span class="s1">&#39;Lunch&#39;</span><span class="p">,</span> <span class="s1">&#39;Dinner&#39;</span><span class="p">,</span> <span class="s1">&#39;Midnight Snack&#39;</span><span class="p">),</span>
+<span class="go">                     data={&#39;Mon&#39;: (15, 20, 12, 3),</span>
+<span class="go">                           &#39;Tues&#39;: (5, 16, 3, 0),</span>
+<span class="go">                           &#39;Weds&#39;: (3, 22, 2, 8),</span>
+<span class="go">                           &#39;Thur&#39;: (6, 7, 1, 9)})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span>
+<span class="go">                        Mon                  Tues      Weds       Thur</span>
+<span class="go">    Breakfast         Toast                 Bagel    Cereal  Croissant</span>
+<span class="go">    Lunch              Soup  Something Different!      Rice     Hotpot</span>
+<span class="go">    Dinner            Curry                  Stew     Pasta    Gnocchi</span>
+<span class="go">    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;t.xlsx&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span>
+<span class="go">    &lt;XLMap: index: &lt;XLRange: &#39;Sheet1&#39;!A2:A5&gt;, columns: &lt;XLRange: &#39;Sheet1&#39;!B1:F1&gt;, data: &lt;XLRange: &#39;Sheet1&#39;!B2:F5&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">index</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!A2:A5&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">columns</span>
+<span class="go">    &lt;XLRange: &#39;Sheet1&#39;!B1:E1&gt;</span>
+</pre></div>
+</div>
+<p>Here are some more indexing examples:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># loc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Lunch&#39;</span><span class="p">,</span> <span class="s1">&#39;Thur&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!E10&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Dinner&#39;</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!B11:E11&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># iloc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!D12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!C9:C12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># at</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;Midnight Snack&#39;</span><span class="p">,</span> <span class="s1">&#39;Tues&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!C12&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># iat</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!D9&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># __getitem__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[</span><span class="s1">&#39;Mon&#39;</span><span class="p">]</span>
+<span class="go">    &lt;XLCell: &#39;Demo Sheet&#39;!B8&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="p">[[</span><span class="s1">&#39;Mon&#39;</span><span class="p">,</span> <span class="s1">&#39;Tues&#39;</span><span class="p">,</span> <span class="s1">&#39;Weds&#39;</span><span class="p">]]</span>
+<span class="go">    &lt;XLRange: &#39;Demo Sheet&#39;!B2:D5&gt;</span>
+</pre></div>
+</div>
+<p>For convenience, you can access a copy of the frame f, in it’s state as it was written to excel:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Lunch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Nom Nom Nom&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span>
+<span class="go">                            Mon         Tues         Weds         Thur</span>
+<span class="go">    Breakfast             Toast        Bagel       Cereal    Croissant</span>
+<span class="go">    Lunch           Nom Nom Nom  Nom Nom Nom  Nom Nom Nom  Nom Nom Nom</span>
+<span class="go">    Dinner                Curry         Stew        Pasta      Gnocchi</span>
+<span class="go">    Midnight Snack      Shmores      Cookies     Biscuits    Chocolate</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlmap</span><span class="o">.</span><span class="n">f</span> <span class="c1"># Preserved :)</span>
+<span class="go">                        Mon                  Tues      Weds       Thur</span>
+<span class="go">    Breakfast         Toast                 Bagel    Cereal  Croissant</span>
+<span class="go">    Lunch              Soup  Something Different!      Rice     Hotpot</span>
+<span class="go">    Dinner            Curry                  Stew     Pasta    Gnocchi</span>
+<span class="go">    Midnight Snack  Shmores               Cookies  Biscuits  Chocolate</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">XLlink</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xl_types.html">XLRange and XLCell</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XLMap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="xl_types.html" title="previous chapter">XLRange and XLCell</a></li>
+      <li>Next: <a href="api.html" title="next chapter">API</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Hugh Ramsden.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/xl_map.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
