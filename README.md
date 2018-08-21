@@ -18,16 +18,11 @@ Additionally XLMaps offer a wrapper around excel engines (currently supporting x
 
 creating a complex chart is as easy as:
 
-    Setup
-
     >>> f = XLDataFrame(index=('Breakfast', 'Lunch', 'Dinner', 'Midnight Snack'),
                         data={'Mon': (15, 20, 12, 3),
                               'Tues': (5, 16, 3, 0),
                               'Weds': (3, 22, 2, 8),
                               'Thur': (6, 7, 1, 9)})
-
-    Create chart with xl_link
-
     >>> xlmap = f.to_excel('Chart.xlsx', sheet_name="XLLinked", engine='openpyxl')
     >>> xl_linked_chart = xlmap.create_chart('bar', title="With xl_link", x_axis_name="Meal", y_axis_name="Calories", subtype='col')
     >>> xlmap.sheet.add_chart(xl_linked_chart, 'F1')
@@ -42,13 +37,9 @@ Producing this chart:
 
 Applying conditional formatting to a table is as easy as:
 
-    Setup
     >>> import numpy as np
     >>> xy_data = XLDataFrame(data={'Y1': np.random.rand(10) * 10,
                                     'Y2': np.random.rand(10) * 10})
-
-    Create table with conditional formatting
-
     >>> xlmap = xy_data.to_excel("ConditionalFormatting.xlsx", engine='xlsxwriter')
     >>> xlmap.sheet.conditional_format(xlmap.data.range, # position of data within spreadsheet
                                        {'type': '3_color_scale',
@@ -62,3 +53,15 @@ Applying conditional formatting to a table is as easy as:
 Check out the examples folder for more examples!
 
 This package uses the utility functions from XlsxWriter under the BSD license found here: https://github.com/jmcnamara/XlsxWriter
+
+## Compatibility
+
+`pandas >= 0.19`
+`Xlsxwriter >= 0.9`
+`openpyxl >= 2.4`
+
+latest tested versions:
+
+`pandas==0.23.4`
+`XlsxWriter==1.0.7` - (potential issue with stock chart, using openpyxl recommend if desired)
+`openpyxl==2.5.5`
